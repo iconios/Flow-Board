@@ -1,0 +1,7 @@
+{
+  // Stop TS from reporting problems for every tsconfig it discovers in node_modules
+  "typescript.tsserver.experimental.enableProjectDiagnostics": false,
+  "problems.exclude": {
+    "**/node_modules/**": true
+  }
+}

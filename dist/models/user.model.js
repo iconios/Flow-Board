@@ -1,10 +1,8 @@
 import mongoose from "mongoose";
-import type { UserCreateType } from "../types/user.type.js";
 import crypto from "node:crypto";
 import bcrypt from "bcrypt";
 import * as dotenv from "dotenv";
 dotenv.config();
-
 const SALT_ROUNDS = Number(process.env.SALT_ROUNDS);
 const UserSchema = new mongoose.Schema({
   email: {
@@ -49,16 +47,9 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
-  resetPasswordToken: {
-    type: String,
-    default: null,
-  },
-  resetPasswordTokenExpires: {
-    type: Date,
-    default: null,
-  },
+  resetPasswordToken: String,
+  resetPasswordTokenExpires: Date,
 });
-
 // Generate hashed verification token
 UserSchema.method("generateVerificationToken", async function () {
   const unHashedCrypto = crypto.randomBytes(32).toString("hex");
@@ -66,7 +57,6 @@ UserSchema.method("generateVerificationToken", async function () {
   this.verificationToken = await bcrypt.hash(unHashedCrypto, salt);
   this.verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 });
-
 // Generate hashed password reset token
 UserSchema.method("generatePasswordResetToken", async function () {
   const unHashedCrypto = crypto.randomBytes(32).toString("hex");
@@ -74,7 +64,6 @@ UserSchema.method("generatePasswordResetToken", async function () {
   this.resetPasswordToken = await bcrypt.hash(unHashedCrypto, salt);
   this.resetPasswordTokenExpires = new Date(Date.now() + 1 * 60 * 60 * 1000);
 });
-
-const User = mongoose.model<UserCreateType>("User", UserSchema);
-
+const User = mongoose.model("User", UserSchema);
 export default User;
+//# sourceMappingURL=user.model.js.map

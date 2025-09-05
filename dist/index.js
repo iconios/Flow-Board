@@ -6,34 +6,28 @@ import dbConnect from "./dbConnection.js";
 import UserRouter from "./controllers/user.controller.js";
 import AuthRouter from "./controllers/auth.controller.js";
 dotenv.config();
-
 // Initialize all variables or constants
 const app = express();
 const server = createServer(app);
 const PORT = process.env.PORT;
 const io = new Server(server);
-
 // Enable express middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
 // Initialize the mongoDB connection
 dbConnect().catch(console.dir);
-
 // Routers
 app.use("/user", UserRouter);
 app.use("/auth", AuthRouter);
-
 // Initialize the socket.io connections
 io.on("connection", (socket) => {
   console.log("A user connected");
-
   socket.on("disconnect", () => {
     console.log("User disconnected");
   });
 });
-
 // Initialize the http server to start listening for requests
 server.listen(PORT, () => {
   console.log("Server running on Port", PORT);
 });
+//# sourceMappingURL=index.js.map
