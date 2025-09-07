@@ -28,6 +28,7 @@ const TaskSchema = new mongoose.Schema({
   list_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "List",
+    index: true,
   },
   collaborators: [
     {

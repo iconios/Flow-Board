@@ -28,6 +28,7 @@ const ListSchema = new mongoose.Schema({
   board_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Board",
+    index: true,
   },
   created_at: {
     type: Date,
@@ -39,3 +40,7 @@ const ListSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+
+const List = mongoose.model('List', ListSchema);
+
+export default List;

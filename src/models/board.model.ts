@@ -15,6 +15,7 @@ const BoardSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
+    index: true
   },
   created_at: {
     type: Date,
@@ -33,6 +34,11 @@ const BoardSchema = new mongoose.Schema({
     default: new Date(),
   },
 });
+
+BoardSchema.pre('save', function(next) {
+  this.updated_at = new Date(Date.now());
+  next();
+})
 
 const Board = mongoose.model("Board", BoardSchema);
 
