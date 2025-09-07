@@ -28,6 +28,8 @@ export const BoardReadOutputSchema = z.object({
 
 export type BoardReadOutputType = z.infer<typeof BoardReadOutputSchema>;
 
+export type BoardDeleteOutputType = z.infer<typeof BoardReadOutputSchema>;
+
 const BoardUpdateOutputSchema = z.object({
   success: z.boolean(),
   message: z.string(),
