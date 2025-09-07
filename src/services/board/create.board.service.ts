@@ -14,25 +14,24 @@ import {
 } from "../../types/board.type.js";
 import User from "../../models/user.model.js";
 import Board from "../../models/board.model.js";
-import { MongooseError } from "mongoose";
+import { MongooseError, Types } from "mongoose";
 
 const CreateBoardService = async (
   // 1. Accept the board details
   boardDetailsInput: BoardDetailsInputType,
-  rawId: string,
 ) => {
   try {
     // 2. Validate the details
     const validatedInput = BoardDetailsInputSchema.parse(boardDetailsInput);
-    const id = rawId.trim();
-    if (!id) {
-      return {
-        success: false,
-        message: "User id required",
-      };
-    }
 
     // 3. Get the User id that created the board
+    const id = validatedInput.user_id;
+    if (!Types.ObjectId.isValid(id)) {
+        return {
+            success: false,
+            message: "Invalid user ID",
+        }
+    }
     const user = await User.findById(id).exec();
     if (!user) {
       return {
