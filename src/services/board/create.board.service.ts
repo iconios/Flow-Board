@@ -26,11 +26,11 @@ const CreateBoardService = async (
 
     // 3. Get the User id that created the board
     const id = validatedInput.user_id;
-    if (!Types.ObjectId.isValid(id)) {
-        return {
-            success: false,
-            message: "Invalid user ID",
-        }
+    if (!Types.ObjectId.isValid(id!)) {
+      return {
+        success: false,
+        message: "Invalid user ID",
+      };
     }
     const user = await User.findById(id).exec();
     if (!user) {
@@ -42,8 +42,8 @@ const CreateBoardService = async (
     const user_id = user._id.toString();
 
     // 4. Save the board details while associating with the user id
-    const title = validatedInput.title.trim();
-    const bg_color = validatedInput.bg_color.trim();
+    const title = validatedInput.title?.trim();
+    const bg_color = validatedInput.bg_color?.trim();
 
     const newBoard = new Board({
       title,

@@ -4,7 +4,7 @@ const BoardSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
-    max: 25
+    max: 25,
   },
   bg_color: {
     type: String,
