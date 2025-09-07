@@ -30,7 +30,7 @@ const PasswordUpdateService = async (
       resetPasswordToken,
       resetPasswordTokenExpires: { $gt: new Date(Date.now()) },
     }).exec();
-    if (!user) {      
+    if (!user) {
       console.log("Invalid reset password token link");
       return {
         success: false,
@@ -41,16 +41,15 @@ const PasswordUpdateService = async (
 
     // Ensure password policy is enforced
     const validatedPassword = UserPasswordSchema.parse(password);
-    console.log('User password update validated')
+    console.log("User password update validated");
 
     // Hash and store the password
     const SALT_ROUNDS = Number(process.env.SALT_ROUNDS);
     const salt = await bcrypt.genSalt(SALT_ROUNDS);
-    const password_hash = await bcrypt.hash(validatedPassword.password, salt);
+    const password_hash = await bcrypt.hash(validatedPassword, salt);
     const email = user.email;
     await User.findOneAndUpdate({ email }, { password_hash });
 
-    
     // Invalidate the token received
     await User.findOneAndUpdate(
       { email },

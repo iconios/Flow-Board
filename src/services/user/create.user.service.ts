@@ -58,8 +58,8 @@ const CreateUserService = async (
 
     // Save new user
     const user = await newUser.save();
-    console.log('Verification token', user.verificationToken)
-    console.log('Verification token expires', user.verificationTokenExpires)
+    console.log("Verification token", user.verificationToken);
+    console.log("Verification token expires", user.verificationTokenExpires);
 
     //Send verification email
     sendVerificationEmail(email, user.firstname, user.verificationToken);

@@ -5,6 +5,7 @@ import * as dotenv from "dotenv";
 import dbConnect from "./dbConnection.js";
 import UserRouter from "./controllers/user.controller.js";
 import AuthRouter from "./controllers/auth.controller.js";
+import cors from "cors";
 dotenv.config();
 
 // Initialize all variables or constants
@@ -16,11 +17,13 @@ const io = new Server(server);
 // Enable express middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(cors());
 
 // Initialize the mongoDB connection
 dbConnect().catch(console.dir);
 
 // Routers
+app.get("/health", (_req, res) => res.sendStatus(200));
 app.use("/user", UserRouter);
 app.use("/auth", AuthRouter);
 

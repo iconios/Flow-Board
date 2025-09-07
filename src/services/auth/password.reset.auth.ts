@@ -12,13 +12,14 @@ import type { UserLoginMessageType } from "../../types/user.type.js";
 import { sendPasswordResetEmail } from "../../utils/mailer.util.js";
 
 const PasswordResetRequestService = async (
-  email: string,
+  rawEmail: string,
 ): Promise<UserLoginMessageType> => {
   try {
     // Check if the email exists on the DB else return generic message
+    const email = rawEmail.trim().toLowerCase();
     const user = await User.findOne({ email }).exec();
     if (!user) {
-      console.log('User not found for password request', email)
+      console.log("User not found for password request", email);
       return {
         success: true,
         message:
@@ -29,14 +30,17 @@ const PasswordResetRequestService = async (
 
     // Generate and store a hashed password reset token
     await user.generatePasswordResetToken();
-    await User.findOneAndUpdate({
-      email: user.email
-    }, {
-      resetPasswordToken: user.resetPasswordToken,
-      resetPasswordTokenExpires: user.resetPasswordTokenExpires
-    })
-    console.log('Password reset token', user.resetPasswordToken)
-    console.log('Password reset token expires', user.resetPasswordTokenExpires)
+    await User.findOneAndUpdate(
+      {
+        email: user.email,
+      },
+      {
+        resetPasswordToken: user.resetPasswordToken,
+        resetPasswordTokenExpires: user.resetPasswordTokenExpires,
+      },
+    );
+    console.log("Password reset token", user.resetPasswordToken);
+    console.log("Password reset token expires", user.resetPasswordTokenExpires);
 
     // Send the passsword reset link email
     sendPasswordResetEmail(user.email, user.firstname, user.resetPasswordToken);

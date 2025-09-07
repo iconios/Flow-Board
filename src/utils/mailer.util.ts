@@ -80,7 +80,7 @@ const sendPasswordResetEmail = (
         </a>
         <p>Or copy and paste this link in your browser:</p>
         <p>${resetPasswordUrl}</p>
-        <p>This link will expire in 1 hour.</p>
+        <p>This link will expire in 30 minutes.</p>
         <p>If you didn't request this, please ignore this email.</p>
       </div>`,
   };
@@ -225,7 +225,7 @@ const sendPasswordUpdateConfirmationEmail = (
   const mailOptions = {
     from: process.env.MAIL_USER,
     to: email,
-    subject: "Please Reset your Password",
+    subject: "Successful Password Change Confirmation",
     html: `<!DOCTYPE html>
       <html lang="en">
       <head>
@@ -270,6 +270,10 @@ const sendPasswordUpdateConfirmationEmail = (
               
               .content {
                   padding: 35px 40px;
+              }
+            
+              .content a {
+                  color: white;
               }
               
               .icon-success {
@@ -376,7 +380,7 @@ const sendPasswordUpdateConfirmationEmail = (
                   
                   <p>Hello ${firstname},</p>
                   
-                  <p>Your password was successfully changed on [Date] at [Time]. If you made this change, no further action is needed.</p>
+                  <p>Your password was successfully changed on ${new Date(Date.now())}. If you made this change, no further action is needed.</p>
                   
                   <div class="info-box">
                       <strong>Security Tip:</strong> Use a unique password for each of your important accounts to maximize your security.
@@ -387,13 +391,13 @@ const sendPasswordUpdateConfirmationEmail = (
                   <a href="#" class="button">Review Account Activity</a>
                   
                   <div class="security-note">
-                      For your security, this email was sent to [User Email] regarding your account.
+                      For your security, this email was sent to ${email} regarding your account.
                   </div>
               </div>
               
               <div class="footer">
                   <p>Need help? <a href="#" class="support-link">Contact our support team</a></p>
-                  <p>© 2023 Your Company Name. All rights reserved.</p>
+                  <p>© ${new Date().getFullYear()} Nerdy Web Consults. All rights reserved.</p>
                   <p>1234 Business Ave, Suite 567, San Francisco, CA 94107</p>
               </div>
           </div>

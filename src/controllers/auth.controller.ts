@@ -71,12 +71,16 @@ AuthRouter.post(
 // Login a user
 AuthRouter.post("/login", RateLimiter, async (req: Request, res: Response) => {
   try {
-    const result = await UserLoginService(req.body);
+    const { email, password } = req.body;
+    console.log("Received email", email);
+    console.log("Received password", password);
+    const result = await UserLoginService({ email, password });
     if (result.success) {
       res.status(200).json({
         success: true,
         message: result.message,
         token: result.token,
+        user: result.user,
       });
     } else {
       res.status(400).json({
@@ -96,91 +100,88 @@ AuthRouter.post("/login", RateLimiter, async (req: Request, res: Response) => {
 });
 
 // Forgot Password Request API
-AuthRouter.post('/forgot-password', 
-  async (req: Request, res: Response) => {
-    try {
-      const { email } = req.body
-      console.log('Forgot password for', email)
-      const result = await PasswordResetRequestService(email)
-      if (!result.success) {
-        res.status(500).json({
-          success: false,
-          message: "Internal server error",
-          error: "Internal server error",
-        })
-        return;
-      }
-
-      res.status(200).json({
-        success: result.success,
-        message: result.message,
-        error: result.error
-      })
-    } catch (error) {
-      console.log("Password reset request error", error);
+AuthRouter.post("/forgot-password", async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    console.log("Forgot password for", email);
+    const result = await PasswordResetRequestService(email);
+    if (!result.success) {
       res.status(500).json({
         success: false,
         message: "Internal server error",
         error: "Internal server error",
       });
+      return;
     }
+
+    res.status(200).json({
+      success: result.success,
+      message: result.message,
+      error: result.error,
+    });
+  } catch (error) {
+    console.log("Password reset request error", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: "Internal server error",
+    });
   }
-)
+});
 
 // Token Validation (The Reset Page) API
-AuthRouter.get('/reset-password',
-  async (req: Request, res: Response) => {
-    try {
-      // Validate the token exists
-      const query = req.query.token;
-      const token = Array.isArray(query) ? query[0] : query;
-      if (typeof token !== "string" || !token) {
-        res.status(400).sendFile(join(__dirname, "expired-token.html"));
-        return;
-      }
-
-      // Handle the request
-      const result = await VerifyPasswordResetService(token)
-      if (!result.success) {
-        res.status(400).sendFile(join(__dirname, "expired-token.html"));
-      }
-
-      //Send the password reset page
-      if (result.success) {
-        res.status(200).sendFile(join(__dirname, "password-reset-page.html"));
-      }
-
-    } catch (error) {
-      console.log('Token validation error', error);
-      res.status(500).send('Server Error')
+AuthRouter.get("/reset-password", async (req: Request, res: Response) => {
+  try {
+    // Validate the token exists
+    const query = req.query.token;
+    const token = Array.isArray(query) ? query[0] : query;
+    if (typeof token !== "string" || !token) {
+      res.status(400).sendFile(join(__dirname, "expired-token.html"));
+      return;
     }
+
+    // Handle the request
+    const result = await VerifyPasswordResetService(token);
+    if (!result.success) {
+      res.status(400).sendFile(join(__dirname, "expired-token.html"));
+    }
+
+    //Send the password reset page
+    if (result.success) {
+      res.status(200).sendFile(join(__dirname, "password-reset-page.html"));
+    }
+  } catch (error) {
+    console.log("Token validation error", error);
+    res.status(500).send("Server Error");
   }
-)
+});
 
 // Password Update Service API
-AuthRouter.post('/password-update',
+AuthRouter.post(
+  "/password-update",
+  RateLimiter,
   async (req: Request, res: Response) => {
     try {
       // Validate the token exists
       const query = req.query.token;
       const token = Array.isArray(query) ? query[0] : query;
-      console.log('Received token', token)
+      console.log("Received token", token);
       if (typeof token !== "string" || !token) {
         res.status(400).sendFile(join(__dirname, "expired-token.html"));
         return;
       }
 
       // Receive the password
-      const { passsword } = req.body;
-      console.log('Received password', passsword)
+      const { password } = req.body;
+      console.log("Received password", password);
 
       // Handle the request
-      const result = await PasswordUpdateService(token, passsword)
+      const result = await PasswordUpdateService(token, password);
       if (!result.success) {
         res.status(400).json({
           success: false,
           message: result.message,
-        })
+        });
         return;
       }
 
@@ -189,13 +190,13 @@ AuthRouter.post('/password-update',
         message: result.message,
       });
     } catch (error) {
-      console.log('Password update error', error);
+      console.log("Password update error", error);
       res.status(500).json({
         success: false,
-        message: 'Internal server error'
-      })
+        message: "Internal server error",
+      });
     }
-  }
-)
+  },
+);
 
 export default AuthRouter;

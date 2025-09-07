@@ -71,7 +71,7 @@ const UserLoginService = async (
     // Generate token with user details
     const token = jwt.sign(
       {
-        email: userExist.email,
+        id: userExist._id.toString(),
         firstname: userExist.firstname,
         lastname: userExist.lastname,
       },
@@ -83,6 +83,11 @@ const UserLoginService = async (
       success: true,
       message: "Login successful",
       token,
+      user: {
+        id: userExist._id.toString(),
+        email: userExist.email,
+        firstname: userExist.firstname,
+      },
     };
   } catch (error) {
     if (error instanceof ZodError) {

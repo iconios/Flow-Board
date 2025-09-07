@@ -44,9 +44,23 @@ export const UserInputTypeSchema = UserCreateInputSchema.extend({
     .trim(),
 });
 
-export const UserPasswordSchema = UserInputTypeSchema.pick({
-  password: true,
-});
+export const UserPasswordSchema = z
+  .string()
+  .min(8, { message: "Password must be minimum 8 characters" })
+  .max(20, { message: "Password should be maximum 20 characters" })
+  .refine((password) => /[A-Z]/.test(password), {
+    message: "Password must have at least one uppercase character",
+  })
+  .refine((password) => /[a-z]/.test(password), {
+    message: "Password must have at least one lowercase character",
+  })
+  .refine((password) => /\d/.test(password), {
+    message: "Password must have at least one numeric character",
+  })
+  .refine((password) => /[`!@#$%^&*()_=+\\[\]'";:/?.>,<|{}]/.test(password), {
+    message: "Password must have at least one special character",
+  })
+  .trim();
 
 export type UserPasswordType = z.infer<typeof UserPasswordSchema>;
 
@@ -73,6 +87,13 @@ const UserLoginMessageSchema = z.object({
   message: z.string(),
   error: z.string().optional(),
   token: z.string().optional(),
+  user: z
+    .object({
+      id: z.string(),
+      email: z.email(),
+      firstname: z.string(),
+    })
+    .optional(),
 });
 
 export type UserLoginMessageType = z.infer<typeof UserLoginMessageSchema>;
