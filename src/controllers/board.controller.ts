@@ -56,33 +56,36 @@ BoardRouter.patch("/boards/:boardId", async (req: Request, res: Response) => {
 });
 
 // Retrieve all user's boards API
-BoardRouter.get("/users/:userId/boards", async (req: Request, res: Response) => {
-  try {
-    // Validate the user Id is received
-    const user = req.params.userId;
-    if (typeof user !== "string" || !user) {
-      return res.status(400).json({
+BoardRouter.get(
+  "/users/:userId/boards",
+  async (req: Request, res: Response) => {
+    try {
+      // Validate the user Id is received
+      const user = req.params.userId;
+      if (typeof user !== "string" || !user) {
+        return res.status(400).json({
+          success: false,
+          message: "Board ID required",
+        });
+      }
+
+      // Retrieve the user's boards
+      const result = await ReadBoardService(user);
+      if (!result.success) {
+        return res.status(400).json(result);
+      }
+
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error("Error retrieving board", error);
+
+      return res.status(500).json({
         success: false,
-        message: "Board ID required",
+        message: "Server Error. Please try again",
       });
     }
-
-    // Retrieve the user's boards
-    const result = await ReadBoardService(user);
-    if (!result.success) {
-      return res.status(400).json(result);
-    }
-
-    return res.status(200).json(result);
-  } catch (error) {
-    console.error("Error retrieving board", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Server Error. Please try again",
-    });
-  }
-});
+  },
+);
 
 // Delete a user's Board API
 BoardRouter.delete(

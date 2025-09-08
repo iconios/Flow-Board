@@ -7,6 +7,7 @@ import UserRouter from "./controllers/user.controller.js";
 import AuthRouter from "./controllers/auth.controller.js";
 import cors from "cors";
 import BoardRouter from "./controllers/board.controller.js";
+import helmet from "helmet";
 dotenv.config();
 
 // Initialize all variables or constants
@@ -16,6 +17,7 @@ const PORT = process.env.PORT;
 const io = new Server(server);
 
 // Enable express middleware
+app.use(helmet());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors());
