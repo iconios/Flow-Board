@@ -26,7 +26,7 @@ const CreateBoardService = async (
 
     // 3. Get the User id that created the board
     const id = validatedInput.user_id;
-    if (!Types.ObjectId.isValid(id!)) {
+    if (!Types.ObjectId.isValid(id)) {
       return {
         success: false,
         message: "Invalid user ID",

@@ -1,7 +1,126 @@
 import express, { type Request, type Response } from "express";
+import CreateBoardService from "../services/board/create.board.service.js";
+import UpdateBoardService from "../services/board/update.board.service.js";
+import ReadBoardService from "../services/board/read.board.service.js";
+import DeleteBoardService from "../services/board/delete.board.service.js";
 
 const BoardRouter = express.Router();
 
-BoardRouter.get("/", (_req: Request, res: Response) => {
-  res.send("Hello Board");
+// Create a Board API
+BoardRouter.post("/boards", async (req: Request, res: Response) => {
+  try {
+    const boardInput = req.body;
+    const result = await CreateBoardService(boardInput);
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    res.status(201).json(result);
+  } catch (error) {
+    console.error("Unknow error while creating board", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server Error. Please try again",
+    });
+  }
 });
+
+// Update a Board API
+BoardRouter.patch("/boards/:boardId", async (req: Request, res: Response) => {
+  try {
+    // Validate the board Id is received
+    const board = req.params.boardId;
+    if (typeof board !== "string" || !board) {
+      return res.status(400).json({
+        success: false,
+        message: "Board ID required",
+      });
+    }
+
+    const { boardDetails } = req.body;
+    const result = await UpdateBoardService(board, boardDetails);
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Error updating board", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server Error. Please try again",
+    });
+  }
+});
+
+// Retrieve all user's boards API
+BoardRouter.get("/users/:userId/boards", async (req: Request, res: Response) => {
+  try {
+    // Validate the user Id is received
+    const user = req.params.userId;
+    if (typeof user !== "string" || !user) {
+      return res.status(400).json({
+        success: false,
+        message: "Board ID required",
+      });
+    }
+
+    // Retrieve the user's boards
+    const result = await ReadBoardService(user);
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Error retrieving board", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server Error. Please try again",
+    });
+  }
+});
+
+// Delete a user's Board API
+BoardRouter.delete(
+  "/users/:userId/boards/:boardId",
+  async (req: Request, res: Response) => {
+    try {
+      // Get the parameters
+      const user = req.params.userId;
+      if (typeof user !== "string" || !user) {
+        return res.status(400).json({
+          success: false,
+          message: "User ID required",
+        });
+      }
+
+      const board = req.params.boardId;
+      if (typeof board !== "string" || !board) {
+        return res.status(400).json({
+          success: false,
+          message: "Board ID required",
+        });
+      }
+
+      const result = await DeleteBoardService(board, user);
+      if (!result.success) {
+        return res.status(400).json(result);
+      }
+
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error("Error retrieving board", error);
+
+      return res.status(500).json({
+        success: false,
+        message: "Server Error. Please try again",
+      });
+    }
+  },
+);
+
+export default BoardRouter;
