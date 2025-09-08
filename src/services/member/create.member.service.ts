@@ -77,7 +77,7 @@ const CreateMemberService = async (
       message: "Member successfully created",
       member: {
         memberId: createdMember._id.toString(),
-        boardId: createdMember.board_id!.toString(),
+        boardId: createdMember.board_id.toString(),
         role: createdMember.role,
       },
     };
