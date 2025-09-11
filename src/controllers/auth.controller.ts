@@ -134,8 +134,10 @@ AuthRouter.get("/reset-password", async (req: Request, res: Response) => {
   try {
     // Validate the token exists
     const query = req.query.token;
+    console.log("Token received");
     const token = Array.isArray(query) ? query[0] : query;
     if (typeof token !== "string" || !token) {
+      console.error("Expired token handler 1 hit");
       res.status(400).sendFile(join(__dirname, "expired-token.html"));
       return;
     }
@@ -143,11 +145,13 @@ AuthRouter.get("/reset-password", async (req: Request, res: Response) => {
     // Handle the request
     const result = await VerifyPasswordResetService(token);
     if (!result.success) {
+      console.error("Expired token handler 2 hit");
       res.status(400).sendFile(join(__dirname, "expired-token.html"));
     }
 
     //Send the password reset page
     if (result.success) {
+      console.error("Successful token handler hit");
       res.status(200).sendFile(join(__dirname, "password-reset-page.html"));
     }
   } catch (error) {

@@ -1,9 +1,12 @@
 /*
 Plan: 
-1. Accept and validate board id, user id, and user role (if available)
-2. Verify that the member doesn't already exist for the board
-3. Create the member
-4. Send op status to the client
+1. Accept and validate owner id, board id, user id, and user role (if available)
+2. Verify that the board exists with the owner as the userid field value
+3. Verify that the user (board member) exists
+4. Verify that the owner is not the same as user
+5. Verify that the board member doesn't already exist for the board
+6. Create the member
+7. Send op status to the client
 */
 
 import { ZodError } from "zod";
@@ -15,12 +18,15 @@ import {
 } from "../../types/member.type.js";
 import BoardMember from "../../models/boardMember.model.js";
 import { MongooseError, Types } from "mongoose";
+import Board from "../../models/board.model.js";
+import User from "../../models/user.model.js";
 
 const CreateMemberService = async (
+  boardOwner: string,
   createMemberInput: MemberCreateInputType,
 ): Promise<MemberCreateOutputType> => {
   try {
-    // 1. Accept and validate board id, user id, and user role (if available)
+    // 1. Accept and validate owner id, board id, user id, and user role (if available)
     const validatedInput = CreateMemberInputSchema.parse(createMemberInput);
     const boardId = validatedInput.board_id;
     if (!Types.ObjectId.isValid(boardId)) {
@@ -38,16 +44,46 @@ const CreateMemberService = async (
       };
     }
 
-    const role = validatedInput.role ?? "member";
-
-    // 2. Verify that the member doesn't already exist for the board
-    const memberExists = await BoardMember.findOne<MemberType>({
-      board_id: boardId,
-      user_id: userId,
-    }).exec();
-    if (memberExists) {
+    const ownerId = boardOwner.trim();
+    if (!Types.ObjectId.isValid(ownerId)) {
       return {
         success: false,
+        message: "Invalid owner id",
+      };
+    }
+
+    const role = validatedInput.role ?? "member";
+
+    const [boardWithOwnerExists, boardMemberExists, memberExists] =
+      await Promise.all([
+        Board.findOne({ _id: boardId, user_id: ownerId }).exec(),
+        User.findById(userId).exec(),
+        BoardMember.findOne<MemberType>({
+          board_id: boardId,
+          user_id: userId,
+        }).exec(),
+      ]);
+
+    // 2. Verify that the board exists with the owner as the userid field value
+    if (!boardWithOwnerExists) {
+      return {
+        success: false,
+        message: "Board not found or you don't have permission to add members",
+      };
+    }
+
+    // 3. Verify that the user (board member) exists
+    if (!boardMemberExists) {
+      return {
+        success: false,
+        message: "User does not exist",
+      };
+    }
+
+    // 4. Verify that the member doesn't already exist for the board
+    if (memberExists) {
+      return {
+        success: true,
         message: "Member already exists for this board",
         member: {
           memberId: memberExists._id.toString(),
@@ -57,7 +93,7 @@ const CreateMemberService = async (
       };
     }
 
-    // 3. Create the member
+    // 5. Create the member
     const member = new BoardMember({
       board_id: boardId,
       user_id: userId,
@@ -71,7 +107,7 @@ const CreateMemberService = async (
       };
     }
 
-    // 4. Send op status to the client
+    // 5. Send op status to the client
     return {
       success: true,
       message: "Member successfully created",
@@ -82,7 +118,10 @@ const CreateMemberService = async (
       },
     };
   } catch (error) {
-    console.error("Error creating a board member", error);
+    console.error(
+      `Error creating ${createMemberInput.user_id} as a member for ${createMemberInput.board_id}`,
+      error,
+    );
 
     if (error instanceof ZodError) {
       return {

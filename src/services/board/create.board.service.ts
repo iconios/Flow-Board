@@ -56,7 +56,7 @@ const CreateBoardService = async (
     // 5. Return the status message to the caller
     return {
       success: true,
-      message: "Board saved",
+      message: "Board created successfully",
       board: {
         boardId: board._id.toString(),
       },

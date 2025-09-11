@@ -1,58 +1,63 @@
 /*
-#Plan:
-1. Receive and validate the userId or boardId
-2. Retrieve the member details from the DB
+#Plan: Get All the Members of a owner's Board
+1. Receive and validate the owner, board
+2. Retrieve the Members associated with a Board 
 3. Send the details to the client
 */
 
 import { Types } from "mongoose";
 import BoardMember from "../../models/boardMember.model.js";
-import type {
-  MemberReadOutputType,
-  MemberType,
+import {
+  ReadMemberInputSchema,
+  type MemberReadOutputType,
+  type MemberType,
+  type ReadMemberInputType,
 } from "../../types/member.type.js";
+import Board from "../../models/board.model.js";
 
 const ReadMemberService = async (
-  boardId?: string,
-  userId?: string,
+  readMemberInput: ReadMemberInputType,
 ): Promise<MemberReadOutputType> => {
   try {
-    // 1. Receive and validate the userId or boardId
-    const board = boardId?.trim();
-    const user = userId?.trim();
-    if (!board && !user) {
-      return {
-        success: false,
-        message: "Missing board ID or user ID",
-      };
-    }
+    // 1. Receive and validate the owner, user or board
+    const validatedInput = ReadMemberInputSchema.parse(readMemberInput);
+    const boardId = validatedInput.boardId;
+    const ownerId = validatedInput.ownerId;
 
-    if (board && !Types.ObjectId.isValid(board)) {
+    if (!Types.ObjectId.isValid(boardId)) {
       return {
         success: false,
         message: "Invalid board ID",
       };
-    } else if (user && !Types.ObjectId.isValid(user)) {
+    }
+
+    // 2. Retrieve the Members associated with a Board
+    const board = await Board.findById(boardId).exec();
+    if (!board) {
       return {
         success: false,
-        message: "Invalid user ID",
+        message: "Board not found",
       };
     }
 
-    // 2. Retrieve the member details from the DB
-    const query = board ? { board_id: board } : { user_id: user };
-    const members = await BoardMember.find<MemberType>(query).exec();
-    if (members.length === 0) {
+    if (board.user_id.toString() !== ownerId) {
       return {
         success: false,
-        message: "No members found",
+        message: "Unauthorized",
       };
     }
+
+    const members = await BoardMember.find<MemberType>({
+      board_id: boardId,
+    }).exec();
 
     // 3. Send the details to the client
     return {
       success: true,
-      message: "Board members retrieved successfully",
+      message:
+        members.length > 0
+          ? "Board members retrieved successfully"
+          : "No members found",
       members,
     };
   } catch (error) {

@@ -82,18 +82,19 @@ const UserCreateMessageSchema = z.object({
 
 export type UserCreateMessageType = z.infer<typeof UserCreateMessageSchema>;
 
+const TokenSchema = z.object({
+  email: z.email(),
+  firstname: z.string(),
+});
+
+export type TokenType = z.infer<typeof TokenSchema>;
+
 const UserLoginMessageSchema = z.object({
   success: z.boolean(),
   message: z.string(),
   error: z.string().optional(),
   token: z.string().optional(),
-  user: z
-    .object({
-      id: z.string(),
-      email: z.email(),
-      firstname: z.string(),
-    })
-    .optional(),
+  user: TokenSchema.optional(),
 });
 
 export type UserLoginMessageType = z.infer<typeof UserLoginMessageSchema>;

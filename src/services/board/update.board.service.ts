@@ -87,7 +87,7 @@ const UpdateBoardService = async (
     // 5. Send the status to the client
     return {
       success: true,
-      message: "Board updated",
+      message: "Board updated successfully",
       board: {
         id: updatedBoard._id.toString(),
         title: updatedBoard.title,

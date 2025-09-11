@@ -26,7 +26,9 @@ const ReadBoardService = async (
     }
 
     // 2. Get the boards of the user from the DB
-    const boards = await Board.find<BoardDetailsType>({ user_id: id }).exec();
+    const boards = await Board.find<BoardDetailsType>({ user_id: id })
+      .select("-user_id")
+      .exec();
 
     // 3. Send the data to the client
     return {

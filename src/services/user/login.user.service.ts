@@ -69,13 +69,20 @@ const UserLoginService = async (
     }
 
     // Generate token with user details
+    const JWT_SECRET = process.env.JWT_SECRET;
+    if (!JWT_SECRET) {
+      return {
+        success: false,
+        message: "Fatal error. JWT token undefined",
+      };
+    }
     const token = jwt.sign(
       {
         id: userExist._id.toString(),
+        email: userExist.email,
         firstname: userExist.firstname,
-        lastname: userExist.lastname,
       },
-      JWT_SECRET!,
+      JWT_SECRET,
     );
 
     // Send token to the caller
@@ -84,7 +91,6 @@ const UserLoginService = async (
       message: "Login successful",
       token,
       user: {
-        id: userExist._id.toString(),
         email: userExist.email,
         firstname: userExist.firstname,
       },

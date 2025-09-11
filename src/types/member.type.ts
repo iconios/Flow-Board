@@ -38,3 +38,10 @@ const MemberReadOutputSchema = MemberCreateOutputSchema.omit({
 });
 
 export type MemberReadOutputType = z.infer<typeof MemberReadOutputSchema>;
+
+export const ReadMemberInputSchema = z.object({
+  ownerId: z.string().trim(),
+  boardId: z.string().trim(),
+});
+
+export type ReadMemberInputType = z.infer<typeof ReadMemberInputSchema>;

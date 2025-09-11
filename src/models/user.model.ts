@@ -5,60 +5,59 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 const SALT_ROUNDS = Number(process.env.SALT_ROUNDS);
-const UserSchema = new mongoose.Schema({
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    trim: true,
+const UserSchema = new mongoose.Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+    firstname: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    lastname: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    password_hash: {
+      type: String,
+      required: true,
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationToken: {
+      type: String,
+      default: null,
+    },
+    verificationTokenExpires: {
+      type: Date,
+      default: null,
+    },
+    resetPasswordToken: {
+      type: String,
+      default: null,
+      index: true,
+    },
+    resetPasswordTokenExpires: {
+      type: Date,
+      default: null,
+      index: true,
+    },
   },
-  firstname: {
-    type: String,
-    required: true,
-    trim: true,
+  {
+    timestamps: {
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+    },
   },
-  lastname: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  password_hash: {
-    type: String,
-    required: true,
-  },
-  created_at: {
-    type: Date,
-    default: Date.now,
-    immutable: true,
-  },
-  updated_at: {
-    type: Date,
-    default: Date.now,
-  },
-  isVerified: {
-    type: Boolean,
-    default: false,
-  },
-  verificationToken: {
-    type: String,
-    default: null,
-  },
-  verificationTokenExpires: {
-    type: Date,
-    default: null,
-  },
-  resetPasswordToken: {
-    type: String,
-    default: null,
-    index: true,
-  },
-  resetPasswordTokenExpires: {
-    type: Date,
-    default: null,
-    index: true,
-  },
-});
+);
 
 // Generate hashed verification token
 UserSchema.method("generateVerificationToken", async function () {
