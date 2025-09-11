@@ -45,3 +45,10 @@ export const ReadMemberInputSchema = z.object({
 });
 
 export type ReadMemberInputType = z.infer<typeof ReadMemberInputSchema>;
+
+
+export const DeleteMemberInputSchema = z.object({
+  memberId: z.string().trim(),
+})
+
+export type DeleteMemberInputType = z.infer<typeof DeleteMemberInputSchema>;

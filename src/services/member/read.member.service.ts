@@ -43,7 +43,7 @@ const ReadMemberService = async (
     if (board.user_id.toString() !== ownerId) {
       return {
         success: false,
-        message: "Unauthorized",
+        message: "Unauthorized access",
       };
     }
 

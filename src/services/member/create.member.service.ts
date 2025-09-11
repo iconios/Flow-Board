@@ -80,7 +80,15 @@ const CreateMemberService = async (
       };
     }
 
-    // 4. Verify that the member doesn't already exist for the board
+    // 4. Verify that the owner is not the same as user
+    if (ownerId === userId) {
+      return {
+        success: false,
+        message: "Owner cannot be the same as board member"
+      }
+    }
+
+    // 5. Verify that the member doesn't already exist for the board
     if (memberExists) {
       return {
         success: true,
@@ -93,7 +101,7 @@ const CreateMemberService = async (
       };
     }
 
-    // 5. Create the member
+    // 6. Create the member
     const member = new BoardMember({
       board_id: boardId,
       user_id: userId,
@@ -107,7 +115,7 @@ const CreateMemberService = async (
       };
     }
 
-    // 5. Send op status to the client
+    // 7. Send op status to the client
     return {
       success: true,
       message: "Member successfully created",
