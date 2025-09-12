@@ -84,8 +84,8 @@ const CreateMemberService = async (
     if (ownerId === userId) {
       return {
         success: false,
-        message: "Owner cannot be the same as board member"
-      }
+        message: "Owner cannot be the same as board member",
+      };
     }
 
     // 5. Verify that the member doesn't already exist for the board

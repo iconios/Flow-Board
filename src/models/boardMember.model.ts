@@ -2,12 +2,6 @@ import mongoose from "mongoose";
 
 const BoardMemberSchema = new mongoose.Schema(
   {
-    ownerId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      index: true,
-      required: true,
-    },
     board_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Board",
@@ -33,6 +27,6 @@ const BoardMemberSchema = new mongoose.Schema(
   },
 );
 
-const BoardMember = mongoose.model("Board_Member", BoardMemberSchema);
+const BoardMember = mongoose.model("BoardMember", BoardMemberSchema);
 
 export default BoardMember;

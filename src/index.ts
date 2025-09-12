@@ -8,6 +8,7 @@ import AuthRouter from "./controllers/auth.controller.js";
 import cors from "cors";
 import BoardRouter from "./controllers/board.controller.js";
 import helmet from "helmet";
+import BoardMemberRouter from "./controllers/member.controller.js";
 dotenv.config();
 
 // Initialize all variables or constants
@@ -51,6 +52,7 @@ app.get("/health", (_req, res) => res.sendStatus(200));
 app.use("/user", UserRouter);
 app.use("/auth", AuthRouter);
 app.use("/board", BoardRouter);
+app.use("/boardmember", BoardMemberRouter);
 
 // Initialize the socket.io connections
 io.on("connection", (socket) => {
