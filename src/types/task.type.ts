@@ -32,3 +32,16 @@ const CreateTaskOutputSchema = z.object({
 });
 
 export type CreateTaskOutputType = z.infer<typeof CreateTaskOutputSchema>;
+
+export const UpdateTaskInputSchema = z.object({
+  title: z.string().min(2, "Minimum of two characters required").optional(),
+  description: z
+    .string()
+    .max(100, "Maximum of 100 characters allowed")
+    .optional(),
+  dueDate: z.iso.datetime().optional(),
+  priority: z.enum(["low", "medium", "high", "critical"]).optional(),
+  position: z.number().optional(),
+});
+
+export type UpdateTaskInputType = z.infer<typeof UpdateTaskInputSchema>;

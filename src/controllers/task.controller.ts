@@ -2,6 +2,7 @@ import express, { type Request, type Response } from "express";
 import TokenExtraction from "../middlewares/token.extraction.util.js";
 import CreateTaskService from "../services/task/create.task.service.js";
 import ReadTaskService from "../services/task/read.task.service.js";
+import UpdateTaskService from "../services/task/update.task.service.js";
 
 const TaskRouter = express.Router();
 
@@ -96,6 +97,45 @@ TaskRouter.get(
       return res.status(500).json({
         success: false,
         message: "Server error. Please try again",
+      });
+    }
+  },
+);
+
+// Update Task API
+TaskRouter.patch(
+  "/:taskId",
+  TokenExtraction,
+  async (req: Request, res: Response) => {
+    try {
+      const taskId = req.params.taskId?.trim();
+      const userId = req.userId;
+      const updateData = req.body;
+      if (!taskId || !userId || !updateData) {
+        return res.status(400).json({
+          success: false,
+          message: "Missing required parameters",
+        });
+      }
+
+      const result = await UpdateTaskService(userId, taskId, updateData);
+      if (!result.success) {
+        return res.status(400).json({
+          success: result.success,
+          message: result.message,
+        });
+      }
+
+      return res.status(200).json({
+        success: result.success,
+        message: result.message,
+        task: result.task,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Server error. Please try again",
+        error: error,
       });
     }
   },
