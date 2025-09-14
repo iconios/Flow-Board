@@ -139,48 +139,49 @@ ListRouter.patch(
 );
 
 // Delete Lists for a Board API
-ListRouter.delete('/:listId',
-    TokenExtraction,
-    async (req: Request, res: Response) => {
-        try {
-            const listId = req.params.listId?.trim();
-            if (!listId) {
-                return res.status(400).json({
-                    success: false,
-                    message: "List ID not found",
-                })
-            }
+ListRouter.delete(
+  "/:listId",
+  TokenExtraction,
+  async (req: Request, res: Response) => {
+    try {
+      const listId = req.params.listId?.trim();
+      if (!listId) {
+        return res.status(400).json({
+          success: false,
+          message: "List ID not found",
+        });
+      }
 
-            const userId = req.userId;
-            if (!userId) {
-                return res.status(401).json({
-                    success: false,
-                    message: "User ID not found"
-                })
-            }
+      const userId = req.userId;
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: "User ID not found",
+        });
+      }
 
-            const result = await DeleteListService(userId, listId)
-            if (!result.success) {
-                return res.status(404).json({
-                    success: result.success,
-                    message: result.message
-                })
-            }
+      const result = await DeleteListService(userId, listId);
+      if (!result.success) {
+        return res.status(404).json({
+          success: result.success,
+          message: result.message,
+        });
+      }
 
-            return res.status(200).json({
-                success: result.success,
-                message: result.message,
-                list: result.list,
-            })
-        } catch (error) {
-            console.error("Error deleting list", error)
+      return res.status(200).json({
+        success: result.success,
+        message: result.message,
+        list: result.list,
+      });
+    } catch (error) {
+      console.error("Error deleting list", error);
 
-            return res.status(500).json({
-                success: false,
-                message: "Server error. Please try again"
-            })
-        }
+      return res.status(500).json({
+        success: false,
+        message: "Server error. Please try again",
+      });
     }
-)
+  },
+);
 
 export default ListRouter;

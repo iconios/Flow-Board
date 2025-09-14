@@ -7,41 +7,23 @@ const TaskSchema = new mongoose.Schema(
       required: true,
     },
     description: String,
-    due_date: Date,
+    dueDate: Date,
     priority: {
       type: String,
       enum: ["low", "medium", "high", "critical"],
       default: "low",
     },
     position: Number,
-    comments: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Comment",
-      },
-    ],
-    activity_logs: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Activity",
-      },
-    ],
-    list_id: {
+    listId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "List",
       index: true,
     },
-    collaborators: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
   },
   {
     timestamps: {
-      createdAt: "created_at",
-      updatedAt: "updated_at",
+      createdAt: "createdAt",
+      updatedAt: "updatedAt",
     },
   },
 );

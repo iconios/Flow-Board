@@ -1,0 +1,34 @@
+import { z } from "zod";
+
+export const CreateTaskInputSchema = z.object({
+  _id: z.string().trim().optional(),
+  title: z.string().trim(),
+  description: z.string().trim().optional(),
+  dueDate: z.iso.datetime().optional(),
+  priority: z
+    .enum(["low", "medium", "high", "critical"])
+    .default("low")
+    .optional(),
+  position: z.number().optional(),
+  listId: z.string().trim(),
+});
+
+export type CreateTaskInputType = z.infer<typeof CreateTaskInputSchema>;
+
+const CreateTaskOutputSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+  task: z
+    .object({
+      id: z.string(),
+      title: z.string(),
+      listId: z.string(),
+      description: z.string(),
+      dueDate: z.iso.datetime(),
+      priority: z.enum(["low", "medium", "high", "critical"]),
+      position: z.number(),
+    })
+    .optional(),
+});
+
+export type CreateTaskOutputType = z.infer<typeof CreateTaskOutputSchema>;

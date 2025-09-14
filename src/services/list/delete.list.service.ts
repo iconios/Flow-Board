@@ -15,7 +15,10 @@ import Board from "../../models/board.model.js";
 import List from "../../models/list.model.js";
 import Task from "../../models/task.model.js";
 
-const DeleteListService = async (userId: string, listId: string) => {
+const DeleteListService = async (
+  userId: string,
+  listId: string,
+): Promise<DeleteListOutputType> => {
   const session = await startSession();
   let result: DeleteListOutputType | null = null;
 
