@@ -1,4 +1,4 @@
-import express from "express";
+import express, { type Request, type Response } from "express";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
 import * as dotenv from "dotenv";
@@ -9,6 +9,7 @@ import cors from "cors";
 import BoardRouter from "./controllers/board.controller.js";
 import helmet from "helmet";
 import BoardMemberRouter from "./controllers/member.controller.js";
+import ListRouter from "./controllers/list.controller.js";
 dotenv.config();
 
 // Initialize all variables or constants
@@ -53,6 +54,12 @@ app.use("/user", UserRouter);
 app.use("/auth", AuthRouter);
 app.use("/board", BoardRouter);
 app.use("/boardmember", BoardMemberRouter);
+app.use("/list", ListRouter);
+
+// Handle 404 errors
+app.all(/(.*)/, (req: Request, res: Response) => {
+  return res.status(404).json({ error: "Route not found" });
+});
 
 // Initialize the socket.io connections
 io.on("connection", (socket) => {

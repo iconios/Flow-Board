@@ -25,7 +25,7 @@ const ReadListService = async (
     }
 
     // 2. Verify that the board has the owner as the user
-    const boardFound = await Board.findOne({
+    const boardFound = await Board.exists({
       _id: boardId,
       user_id: userId,
     }).exec();
@@ -38,7 +38,8 @@ const ReadListService = async (
 
     // 3. Send the board's lists to the user
     const boardLists = await List.find({ boardId })
-      .sort({ position: 1 })
+      .sort({ position: 1, _id: 1 })
+      .select("-userId")
       .exec();
     if (boardLists.length === 0) {
       return {
@@ -54,12 +55,11 @@ const ReadListService = async (
       position: list.position,
       status: list.status,
       boardId: list.boardId.toString(),
-      userId: list.userId.toString(),
     }));
 
     return {
       success: true,
-      message: "List(s) found",
+      message: `${transformedLists.length} List(s) found`,
       lists: transformedLists,
     };
   } catch (error) {
