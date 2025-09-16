@@ -39,18 +39,9 @@ const CreateBoardService = async (
         message: "Invalid User",
       };
     }
-    const user_id = user._id.toString();
 
     // 4. Save the board details while associating with the user id
-    const title = validatedInput.title?.trim();
-    const bg_color = validatedInput.bg_color?.trim();
-
-    const newBoard = new Board({
-      title,
-      user_id,
-      bg_color,
-    });
-
+    const newBoard = new Board(validatedInput);
     const board = await newBoard.save();
 
     // 5. Return the status message to the caller
@@ -58,7 +49,10 @@ const CreateBoardService = async (
       success: true,
       message: "Board created successfully",
       board: {
-        boardId: board._id.toString(),
+        id: board._id.toString(),
+        title: board.title,
+        bg_color: board.bg_color,
+        lists: board.lists,
       },
     };
   } catch (error) {

@@ -1,17 +1,19 @@
 import { z } from "zod";
 
-export const CreateTaskInputSchema = z.object({
-  _id: z.string().trim().optional(),
-  title: z.string().trim(),
-  description: z.string().trim().optional(),
-  dueDate: z.iso.datetime().optional(),
-  priority: z
-    .enum(["low", "medium", "high", "critical"])
-    .default("low")
-    .optional(),
-  position: z.number().optional(),
-  listId: z.string().trim(),
-});
+export const CreateTaskInputSchema = z
+  .object({
+    _id: z.string().trim().optional(),
+    title: z.string().trim(),
+    description: z.string().trim().optional(),
+    dueDate: z.iso.datetime().optional(),
+    priority: z
+      .enum(["low", "medium", "high", "critical"])
+      .default("low")
+      .optional(),
+    position: z.number().optional(),
+    listId: z.string().trim(),
+  })
+  .strict();
 
 export type CreateTaskInputType = z.infer<typeof CreateTaskInputSchema>;
 
@@ -45,3 +47,21 @@ export const UpdateTaskInputSchema = z.object({
 });
 
 export type UpdateTaskInputType = z.infer<typeof UpdateTaskInputSchema>;
+
+const DeleteTaskOutputSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+  task: z
+    .object({
+      id: z.string(),
+      title: z.string(),
+      description: z.string(),
+      dueDate: z.string(),
+      priority: z.string(),
+      position: z.number(),
+      listId: z.string(),
+    })
+    .optional(),
+});
+
+export type DeleteTaskOutputType = z.infer<typeof DeleteTaskOutputSchema>;

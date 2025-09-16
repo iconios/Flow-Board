@@ -10,26 +10,20 @@
 import { MongooseError, Types } from "mongoose";
 import Board from "../../models/board.model.js";
 import {
-  BoardDetailsInputSchema,
-  type BoardDetailsInputType,
+  UpdateBoardInputSchema,
   type BoardDetailsType,
   type BoardUpdateOutputType,
+  type UpdateBoardInputType,
 } from "../../types/board.type.js";
 import { ZodError } from "zod";
 
 const UpdateBoardService = async (
   board_id: string,
-  boardDetailsInput: BoardDetailsInputType,
+  boardDetailsInput: UpdateBoardInputType,
 ): Promise<BoardUpdateOutputType> => {
   try {
     // 1. Receive and validate the user id
-    const validatedInput = BoardDetailsInputSchema.parse(boardDetailsInput);
-    if (!validatedInput.title && !validatedInput.bg_color) {
-      return {
-        success: false,
-        message: "Missing update fields",
-      };
-    }
+    const validatedInput = UpdateBoardInputSchema.parse(boardDetailsInput);
 
     const userId = validatedInput.user_id;
     if (!Types.ObjectId.isValid(userId)) {
@@ -64,18 +58,14 @@ const UpdateBoardService = async (
     }
 
     // 4. Update the board details on the DB
-    const updateData: { title?: string; bg_color?: string } = {};
-    if (validatedInput.title) {
-      updateData.title = validatedInput.title;
-    }
-    if (validatedInput.bg_color) {
-      updateData.bg_color = validatedInput.bg_color;
-    }
-
-    const updatedBoard = await Board.findByIdAndUpdate(boardId, updateData, {
-      new: true,
-      runValidators: true,
-    }).exec();
+    const updatedBoard = await Board.findByIdAndUpdate(
+      boardId,
+      validatedInput,
+      {
+        new: true,
+        runValidators: true,
+      },
+    ).exec();
 
     if (!updatedBoard) {
       return {

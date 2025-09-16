@@ -7,7 +7,7 @@ import DeleteListService from "../services/list/delete.list.service.js";
 
 const ListRouter = express.Router();
 
-// Get Lists of a Board API
+// Get all the Lists of a Board API
 ListRouter.get(
   "/:boardId",
   TokenExtraction,

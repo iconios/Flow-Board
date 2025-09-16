@@ -1,12 +1,25 @@
 import { z } from "zod";
 
 export const BoardDetailsInputSchema = z.object({
-  title: z.string().trim().optional(),
+  title: z.string().trim(),
   bg_color: z.string().trim().optional(),
   user_id: z.string(),
 });
 
 export type BoardDetailsInputType = z.infer<typeof BoardDetailsInputSchema>;
+
+export const UpdateBoardInputSchema = z
+  .object({
+    title: z.string().trim().optional(),
+    user_id: z.string(),
+    bg_color: z
+      .string()
+      .regex(/^#([A-Fa-f0-9]{6})$/, "Valid hex color code required")
+      .optional(),
+  })
+  .strict();
+
+export type UpdateBoardInputType = z.infer<typeof UpdateBoardInputSchema>;
 
 const BoardDetailsSchema = z.object({
   _id: z.string().optional(),

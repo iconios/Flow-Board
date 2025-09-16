@@ -11,6 +11,8 @@ import helmet from "helmet";
 import BoardMemberRouter from "./controllers/member.controller.js";
 import ListRouter from "./controllers/list.controller.js";
 import TaskRouter from "./controllers/task.controller.js";
+import ActivityRouter from "./controllers/activity.controller.js";
+import CommentRouter from "./controllers/comment.controller.js";
 dotenv.config();
 
 // Initialize all variables or constants
@@ -57,6 +59,8 @@ app.use("/board", BoardRouter);
 app.use("/boardmember", BoardMemberRouter);
 app.use("/list", ListRouter);
 app.use("/task", TaskRouter);
+app.use("/activity", ActivityRouter);
+app.use("/comment", CommentRouter);
 
 // Handle 404 errors
 app.all(/(.*)/, (req: Request, res: Response) => {

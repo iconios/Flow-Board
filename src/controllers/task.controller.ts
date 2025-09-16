@@ -3,6 +3,7 @@ import TokenExtraction from "../middlewares/token.extraction.util.js";
 import CreateTaskService from "../services/task/create.task.service.js";
 import ReadTaskService from "../services/task/read.task.service.js";
 import UpdateTaskService from "../services/task/update.task.service.js";
+import DeleteTaskService from "../services/task/delete.task.service.js";
 
 const TaskRouter = express.Router();
 
@@ -102,7 +103,7 @@ TaskRouter.get(
   },
 );
 
-// Update Task API
+// Update a Task API
 TaskRouter.patch(
   "/:taskId",
   TokenExtraction,
@@ -136,6 +137,51 @@ TaskRouter.patch(
         success: false,
         message: "Server error. Please try again",
         error: error,
+      });
+    }
+  },
+);
+
+// Delete a Task API
+TaskRouter.delete(
+  "/:taskId",
+  TokenExtraction,
+  async (req: Request, res: Response) => {
+    try {
+      const taskId = req.params.taskId;
+      if (!taskId) {
+        return res.status(422).json({
+          success: false,
+          message: "Task ID not found",
+        });
+      }
+
+      const userId = req.userId;
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: "User ID not found",
+        });
+      }
+
+      const result = await DeleteTaskService(userId, taskId);
+      if (!result.success) {
+        return res.status(400).json({
+          success: false,
+          message: result.message,
+        });
+      }
+
+      return res.status(200).json({
+        success: result.success,
+        message: result.message,
+        task: result.task,
+      });
+    } catch (error) {
+      console.error("Server error", error);
+      return res.status(500).json({
+        success: false,
+        message: "Server error. Please try again",
       });
     }
   },
