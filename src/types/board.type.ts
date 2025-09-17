@@ -56,3 +56,25 @@ const BoardUpdateOutputSchema = z.object({
 });
 
 export type BoardUpdateOutputType = z.infer<typeof BoardUpdateOutputSchema>;
+
+export const GetBoardIdInputSchema = z
+  .object({
+    listId: z.string().trim().nonempty().optional(),
+    taskId: z.string().trim().nonempty().optional(),
+    commentId: z.string().trim().nonempty().optional(),
+  })
+  .strict();
+
+export type GetBoardIdInputType = z.infer<typeof GetBoardIdInputSchema>;
+
+const GetBoardIdOutputSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+  board: z
+    .object({
+      id: z.string(),
+    })
+    .optional(),
+});
+
+export type GetBoardIdOutputType = z.infer<typeof GetBoardIdOutputSchema>;

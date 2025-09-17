@@ -1,7 +1,7 @@
 /*
 #Plan:
 1. Get and validate the task ID
-2. Verify that the user owns the task
+2. Verify that the user owns the task or is a board member
 3. Send the comments for the task to the user
 */
 
@@ -9,6 +9,8 @@ import { MongooseError, Types } from "mongoose";
 import List from "../../models/list.model.js";
 import Comment from "../../models/comment.model.js";
 import type { ReadCommentOutputType } from "../../types/comment.type.js";
+import BoardMember from "../../models/boardMember.model.js";
+import GetBoardId from "../../utils/get.boardId.util.js";
 
 const ReadCommentService = async (
   userId: string,
@@ -24,22 +26,40 @@ const ReadCommentService = async (
       };
     }
 
-    // 2. Verify that the user owns the task
-    const userOwnsTask = await List.findOne({
-      tasks: task,
-      userId,
-    }).exec();
-    if (!userOwnsTask) {
+    // 2. Verify that the user owns the task or is a board member
+    const boardId = (await GetBoardId({ taskId: task })).board?.id;
+    if (!boardId) {
       return {
         success: false,
-        message: "Task not found",
+        message: "No board found for task",
       };
     }
 
-    // 3. Send the comments for the task to the user
+    const userOwnsTask = await List.findOne({
+      tasks: task,
+      userId,
+    })
+      .select("_id")
+      .lean()
+      .exec();
+
+    const userIsBoardMember = await BoardMember.findOne({
+      user_id: userId,
+      board_id: boardId,
+    })
+      .select("_id")
+      .lean()
+      .exec();
+    if (!userOwnsTask && !userIsBoardMember) {
+      return {
+        success: false,
+        message: "Access denied",
+      };
+    }
+
+    // 3. Send the comments for the task to the requesting-user
     const userComments = await Comment.find({
       taskId,
-      userId,
     })
       .sort({ updatedAt: -1 })
       .exec();

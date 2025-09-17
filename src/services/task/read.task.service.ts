@@ -1,16 +1,20 @@
 /*
 #Plan:
-1. Get and validate the list ID
-2. Get the tasks associated with the list
-3. Send the tasks to the user
+1. Get and validate the list ID and board ID
+2. Verify the user owns the task's list or is a board member
+3. Get the tasks associated with the list
+4. Send the tasks to the user
 */
 
-import mongoose, { MongooseError, Types } from "mongoose";
+import { MongooseError, Types } from "mongoose";
 import List from "../../models/list.model.js";
+import BoardMember from "../../models/boardMember.model.js";
+import GetBoardId from "../../utils/get.boardId.util.js";
+import Task from "../../models/task.model.js";
 
 const ReadTaskService = async (user: string, list: string) => {
   try {
-    // 1. Get and validate the list ID
+    // 1. Get and validate the list ID and board ID
     const listId = list.trim();
     if (!listId) {
       return {
@@ -27,34 +31,56 @@ const ReadTaskService = async (user: string, list: string) => {
     }
 
     const userId = user.trim();
-    const listObjectId = new mongoose.Types.ObjectId(listId);
-
-    // 2. Get the tasks associated with the list
-    const userOwnsList = await List.findOne({
-      _id: listObjectId,
-      userId,
-    })
-      .populate("tasks")
-      .exec();
-    if (!userOwnsList) {
+    const board = await GetBoardId({ listId });
+    const boardId = board.board?.id;
+    if (!boardId) {
       return {
         success: false,
-        message: "List associated with the tasks not found",
-      };
-    }
-    const tasks = userOwnsList.tasks;
-    if (!tasks || tasks.length === 0) {
-      return {
-        success: true,
-        message: "No task(s) not found",
+        message: board.message ?? "Board not found for task's list",
       };
     }
 
-    // 3. Send the tasks to the user
+    // 2. Verify the user owns the task's list or is a board member
+    const userOwnsList = await List.findOne({
+      _id: listId,
+      userId,
+    })
+      .select("_id")
+      .lean().exec();
+
+    const userIsBoardMember = await BoardMember.findOne({
+      user_id: userId,
+      board_id: boardId,
+    })
+      .select("_id")
+      .lean().exec();
+
+    if (!userOwnsList && !userIsBoardMember) {
+      return {
+        success: false,
+        message: "Access denied to Tasks",
+      };
+    }
+
+    // 3. Get the tasks associated with the list
+    const tasksFetched = await Task.find({ listId }).lean().exec();
+    
+    const tasksToReturn = tasksFetched.map((task) => ({
+      id: task._id.toString(),
+      title: task.title,
+      description: task.description ?? "",
+      priority: task.priority,
+      position: task.position ?? 0,
+      dueDate:  task.dueDate ?? "",
+      listId: task.listId
+    }))
+
+
+    // 4. Send the tasks to the user
     return {
       success: true,
-      message: `${tasks?.length} task(s) found`,
-      tasks: tasks,
+      message: `${tasksToReturn.length} task(s) found`,
+      tasks: tasksToReturn,
     };
   } catch (error) {
     console.error("Error fetching tasks", error);

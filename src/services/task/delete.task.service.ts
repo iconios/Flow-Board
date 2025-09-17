@@ -1,22 +1,26 @@
 /*
 #Plan:
-1. Accept and validate the task's list
-2. Verify that the user owns the task's list
+1. Accept and validate the task and board member
+2. Verify that the user owns the task's list or is a board member
 3. Remove the task id from its associated list
 4. Delete the task
-5. Send the deleted task data to user
+5. Delete the comments for the task
+6. Send the deleted task data to user
 */
 
 import mongoose, { MongooseError, Types } from "mongoose";
 import List from "../../models/list.model.js";
 import Task from "../../models/task.model.js";
 import type { DeleteTaskOutputType } from "../../types/task.type.js";
+import BoardMember from "../../models/boardMember.model.js";
+import GetBoardId from "../../utils/get.boardId.util.js";
+import Comment from "../../models/comment.model.js";
 
 const DeleteTaskService = async (
   userId: string,
   taskId: string,
 ): Promise<DeleteTaskOutputType> => {
-  // 1. Accept and validate the task's list
+  // 1. Accept and validate the task and board member
   const task = taskId.trim();
   if (!task) {
     return {
@@ -32,46 +36,72 @@ const DeleteTaskService = async (
     };
   }
 
+  const board = await GetBoardId({ taskId: task });
+  const boardId = board.board?.id;
+  if (!boardId) {
+    return {
+      success: false,
+      message: board.message ?? "Board ID not found",
+    };
+  }
+
   const session = await mongoose.startSession();
   let result: DeleteTaskOutputType | null = null;
 
   try {
     await session.withTransaction(async () => {
-      // 2. Verify that the user owns the task's list
-      const taskObjectId = new Types.ObjectId(task);
+      // 2. Verify that the user owns the task's list or is a board member
+      const userOwnsTask = await List.findOne({ tasks: task, userId })
+        .select("_id")
+        .lean()
+        .session(session);
 
-      // 3. Verify that the user owns the task's list and Remove the task id from its associated list
+      const userIsBoardMember = await BoardMember.findOne({
+        user_id: userId,
+        board_id: boardId,
+      })
+        .select("_id")
+        .lean()
+        .session(session);
+
+      if (!userOwnsTask && !userIsBoardMember) {
+        throw new Error("Access denied");
+      }
+
+      // 3. Remove the task id from its associated list
       const taskRemovedFromList = await List.findOneAndUpdate(
-        { tasks: taskObjectId, userId },
-        { $pull: { tasks: taskObjectId } },
-        { new: true },
+        { tasks: task },
+        { $pull: { tasks: task } },
       )
-        .session(session)
-        .exec();
+        .select("_id")
+        .lean()
+        .session(session);
+
       if (!taskRemovedFromList) {
-        throw new Error("Task not found");
+        throw new Error("List not found for Task");
       }
 
       // 4. Delete the task
-      const taskDeleted = await Task.findByIdAndDelete(taskObjectId)
-        .session(session)
-        .exec();
+      const taskDeleted = await Task.findByIdAndDelete(task).session(session);
       if (!taskDeleted) {
         throw new Error("Task not deleted");
       }
 
-      // 5. Send the deleted task data to user
+      // 5. Delete the comments for the task
+      await Comment.deleteMany({ taskId: task }).session(session);
+
+      // 6. Send the deleted task data to user
       result = {
         success: true,
         message: "Task deleted successfully",
         task: {
-          id: taskObjectId.toString(),
+          id: taskDeleted._id.toString(),
           title: taskDeleted.title,
           description: taskDeleted.description ?? "",
           dueDate: taskDeleted.dueDate?.toISOString() ?? "",
           priority: taskDeleted.priority,
           position: taskDeleted.position ?? 0,
-          listId: taskRemovedFromList._id.toString(),
+          listId: taskDeleted.listId?.toString() ?? "",
         },
       };
     });
@@ -79,7 +109,6 @@ const DeleteTaskService = async (
     if (!result) {
       throw new Error("Task deletion completed but returned nothing");
     }
-
     return result;
   } catch (error) {
     console.error("Error deleting the task", error);
@@ -92,10 +121,17 @@ const DeleteTaskService = async (
     }
 
     if (error instanceof Error) {
-      if (error.message === "Task not found") {
+      if (error.message === "Access denied") {
         return {
           success: false,
-          message: "Task not found",
+          message: "Access denied",
+        };
+      }
+
+      if (error.message === "List not found for Task") {
+        return {
+          success: false,
+          message: "List not found for Task",
         };
       }
 

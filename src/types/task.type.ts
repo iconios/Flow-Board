@@ -39,13 +39,13 @@ export const UpdateTaskInputSchema = z.object({
   title: z.string().min(2, "Minimum of two characters required").optional(),
   description: z
     .string()
-    .max(100, "Maximum of 100 characters allowed")
+    .max(255, "Maximum of 100 characters allowed")
     .optional(),
   dueDate: z.iso.datetime().optional(),
   priority: z.enum(["low", "medium", "high", "critical"]).optional(),
   position: z.number().optional(),
-  listId: z.string().optional(),
-});
+  listId: z.string().nonempty().optional(),
+}).strict();
 
 export type UpdateTaskInputType = z.infer<typeof UpdateTaskInputSchema>;
 
@@ -70,15 +70,17 @@ export type DeleteTaskOutputType = z.infer<typeof DeleteTaskOutputSchema>;
 const UpdateTaskOutputSchema = z.object({
   success: z.boolean(),
   message: z.string(),
-  task: z.object({
-    id: z.string(),
-    title: z.string(),
-    description: z.string(),
-    dueDate: z.iso.datetime(),
-    priority: z.enum(["low", "medium", "high", "critical"]),
-    position: z.number(),
-    listId: z.string(),
-  }).optional()
-})
+  task: z
+    .object({
+      id: z.string(),
+      title: z.string(),
+      description: z.string(),
+      dueDate: z.iso.datetime(),
+      priority: z.enum(["low", "medium", "high", "critical"]),
+      position: z.number(),
+      listId: z.string(),
+    })
+    .optional(),
+});
 
 export type UpdateTaskOutputType = z.infer<typeof UpdateTaskOutputSchema>;
