@@ -44,6 +44,7 @@ export const UpdateTaskInputSchema = z.object({
   dueDate: z.iso.datetime().optional(),
   priority: z.enum(["low", "medium", "high", "critical"]).optional(),
   position: z.number().optional(),
+  listId: z.string().optional(),
 });
 
 export type UpdateTaskInputType = z.infer<typeof UpdateTaskInputSchema>;
@@ -65,3 +66,19 @@ const DeleteTaskOutputSchema = z.object({
 });
 
 export type DeleteTaskOutputType = z.infer<typeof DeleteTaskOutputSchema>;
+
+const UpdateTaskOutputSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+  task: z.object({
+    id: z.string(),
+    title: z.string(),
+    description: z.string(),
+    dueDate: z.iso.datetime(),
+    priority: z.enum(["low", "medium", "high", "critical"]),
+    position: z.number(),
+    listId: z.string(),
+  }).optional()
+})
+
+export type UpdateTaskOutputType = z.infer<typeof UpdateTaskOutputSchema>;
