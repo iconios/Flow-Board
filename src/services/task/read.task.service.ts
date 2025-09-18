@@ -46,14 +46,16 @@ const ReadTaskService = async (user: string, list: string) => {
       userId,
     })
       .select("_id")
-      .lean().exec();
+      .lean()
+      .exec();
 
     const userIsBoardMember = await BoardMember.findOne({
       user_id: userId,
       board_id: boardId,
     })
       .select("_id")
-      .lean().exec();
+      .lean()
+      .exec();
 
     if (!userOwnsList && !userIsBoardMember) {
       return {
@@ -64,17 +66,16 @@ const ReadTaskService = async (user: string, list: string) => {
 
     // 3. Get the tasks associated with the list
     const tasksFetched = await Task.find({ listId }).lean().exec();
-    
+
     const tasksToReturn = tasksFetched.map((task) => ({
       id: task._id.toString(),
       title: task.title,
       description: task.description ?? "",
       priority: task.priority,
       position: task.position ?? 0,
-      dueDate:  task.dueDate ?? "",
-      listId: task.listId
-    }))
-
+      dueDate: task.dueDate ?? "",
+      listId: task.listId,
+    }));
 
     // 4. Send the tasks to the user
     return {

@@ -1,12 +1,13 @@
 /*
 #plan:
-1. Get and validate the list ID, and user ID
-2. Get the board the list belongs to and verify that the user owns the board
+1. Get and validate the list ID, board ID, and user ID
+2. Verify that the user owns the list or is a board member
 3. Get the IDs of all the tasks from within the list
-4. Delete the tasks from the collection
-5. Remove the list from the board
-6. Delete the list from the collection
-7. Send the report to the client
+4. Delete all the comments of each task from the collection
+6. Delete the tasks from the collection
+7. Remove the list from the board
+8. Delete the list from the collection
+9. Send the report to the client
 */
 
 import { startSession, Types } from "mongoose";
@@ -14,39 +15,58 @@ import type { DeleteListOutputType } from "../../types/list.type.js";
 import Board from "../../models/board.model.js";
 import List from "../../models/list.model.js";
 import Task from "../../models/task.model.js";
+import GetBoardId from "../../utils/get.boardId.util.js";
+import BoardMember from "../../models/boardMember.model.js";
+import Comment from "../../models/comment.model.js";
 
 const DeleteListService = async (
   userId: string,
   listId: string,
 ): Promise<DeleteListOutputType> => {
-  const session = await startSession();
-  let result: DeleteListOutputType | null = null;
-
-  // 1. Get and validate the list ID, and user ID
+  // 1. Get and validate the list ID, board ID, and user ID
   if (!Types.ObjectId.isValid(listId.trim())) {
     return {
       success: false,
       message: "Invalid list ID format",
     };
   }
-  const listObjectId = new Types.ObjectId(listId.trim());
 
+  const board = await GetBoardId({ listId });
+  const boardId = board.board?.id;
+  if (!boardId) {
+    return {
+      success: false,
+      message: board.message ?? "Board for list does not exist",
+    };
+  }
+
+  const session = await startSession();
+  let result: DeleteListOutputType | null = null;
   try {
     await session.withTransaction(async () => {
-      // 2. Get the board the list belongs to and verify that the user owns the board
-      const board = await Board.findOne({
-        lists: listObjectId,
-        user_id: userId,
+      // 2. Verify that the user owns the list or is a board member
+      const userOwnsList = await List.findOne({
+        _id: listId,
+        userId,
       })
+        .lean()
         .session(session)
         .exec();
-      if (!board) {
-        throw new Error("Board not found");
+
+      const userIsBoardMember = await BoardMember.findOne({
+        user_id: userId,
+        board_id: boardId,
+      })
+        .lean()
+        .session(session)
+        .exec();
+
+      if (!userOwnsList && !userIsBoardMember) {
+        throw new Error("Board not found or access denied");
       }
 
       // 3. Get the IDs of all the tasks from within the list
       const listToBeDeleted = await List.findById(listId)
-        .select("_id title position status tasks")
         .session(session)
         .exec();
       if (!listToBeDeleted) {
@@ -54,7 +74,18 @@ const DeleteListService = async (
       }
       const tasksIDs = listToBeDeleted.tasks || [];
 
-      // 4. Delete the tasks from the collection
+      // 4. Delete all the comments of each task from the collection
+      await Promise.all(
+        tasksIDs?.map(async (taskID) => {
+          await Comment.deleteMany({
+            taskId: taskID,
+          })
+            .session(session)
+            .exec();
+        }),
+      );
+
+      // 5. Delete the tasks from the collection
       if (tasksIDs.length > 0) {
         await Task.deleteMany({
           _id: { $in: tasksIDs },
@@ -64,8 +95,8 @@ const DeleteListService = async (
       }
 
       // 5. Remove the list from the board
-      await Board.findByIdAndUpdate(board._id, {
-        $pull: { lists: listObjectId },
+      await Board.findByIdAndUpdate(boardId, {
+        $pull: { lists: listId },
       })
         .session(session)
         .exec();
@@ -79,13 +110,19 @@ const DeleteListService = async (
       }
 
       // 7. Send the report to the client
+      const tasks = tasksIDs.map((task) => task._id.toString());
+
       result = {
         success: true,
         message: "List successfully deleted",
         list: {
+          id: listToBeDeleted._id.toString(),
           title: listToBeDeleted.title,
           position: listToBeDeleted.position,
           status: listToBeDeleted.status,
+          boardId: listToBeDeleted.boardId.toString(),
+          userId: listToBeDeleted.userId.toString(),
+          tasks: tasks,
         },
       };
     });
@@ -99,10 +136,10 @@ const DeleteListService = async (
     console.error("Error while deleting list", error);
 
     if (error instanceof Error) {
-      if (error.message === "Board not found") {
+      if (error.message === "Board not found or access denied") {
         return {
           success: false,
-          message: "Board not found",
+          message: "Board not found or access denied",
         };
       }
 

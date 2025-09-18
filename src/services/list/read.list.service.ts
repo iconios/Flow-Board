@@ -1,7 +1,7 @@
 /*
 #Plan:
-1. Get and validate the owner and the board
-2. Verify that the board has the owner as the user
+1. Get and validate the user and the board
+2. Verify that the user owns the board or is a board member
 3. Send the board's lists to the user
 */
 
@@ -9,13 +9,14 @@ import { MongooseError, Types } from "mongoose";
 import Board from "../../models/board.model.js";
 import List from "../../models/list.model.js";
 import type { ReadListOutputType } from "../../types/list.type.js";
+import BoardMember from "../../models/boardMember.model.js";
 
 const ReadListService = async (
   userId: string,
   board: string,
 ): Promise<ReadListOutputType> => {
   try {
-    // 1. Get and validate the owner and the board
+    // 1. Get and validate the user and the board
     const boardId = board.trim();
     if (!Types.ObjectId.isValid(boardId)) {
       return {
@@ -24,15 +25,25 @@ const ReadListService = async (
       };
     }
 
-    // 2. Verify that the board has the owner as the user
-    const boardFound = await Board.exists({
+    // 2. Verify that the user owns the board or is a board member
+    const userOwnsBoard = await Board.findOne({
       _id: boardId,
       user_id: userId,
-    }).exec();
-    if (!boardFound) {
+    })
+      .lean()
+      .exec();
+
+    const userIsBoardMember = await BoardMember.findOne({
+      user_id: userId,
+      board_id: boardId,
+    })
+      .lean()
+      .exec();
+
+    if (!userOwnsBoard && !userIsBoardMember) {
       return {
         success: false,
-        message: "Board not found",
+        message: "Board not found or access denied",
       };
     }
 

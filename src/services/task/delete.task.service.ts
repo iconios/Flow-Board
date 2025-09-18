@@ -65,7 +65,7 @@ const DeleteTaskService = async (
         .session(session);
 
       if (!userOwnsTask && !userIsBoardMember) {
-        throw new Error("Access denied");
+        throw new Error("Task not found or access denied");
       }
 
       // 3. Remove the task id from its associated list
@@ -121,10 +121,10 @@ const DeleteTaskService = async (
     }
 
     if (error instanceof Error) {
-      if (error.message === "Access denied") {
+      if (error.message === "Task not found or access denied") {
         return {
           success: false,
-          message: "Access denied",
+          message: "Task not found or access denied",
         };
       }
 

@@ -1,7 +1,7 @@
 /*
 #Plan: Create a list for a user
 1. Get the list details and validate them
-2. Verify that the board exists and the user has access to it
+2. Verify that the board exists with the user as owner or is a board member
 3. Verify that the same list title doesn't exist for the same board
 4. Create the list
 5. Add the list to the board
@@ -17,6 +17,7 @@ import {
 } from "../../types/list.type.js";
 import mongoose, { MongooseError } from "mongoose";
 import Board from "../../models/board.model.js";
+import BoardMember from "../../models/boardMember.model.js";
 
 const CreateListService = async (
   userId: string,
@@ -26,29 +27,43 @@ const CreateListService = async (
   let result: CreateListOutputType | null = null;
 
   try {
-    await session.withTransaction(async () => {
-      // 1. Get the list details and validate them
-      const validatedInput = CreateListInputSchema.parse(createListInput);
-      const { title, boardId, status, position } = validatedInput;
+    // 1. Get the list details and validate them
+    const validatedInput = CreateListInputSchema.parse(createListInput);
+    const { title, boardId, status, position } = validatedInput;
 
-      // 2. Verify that the board exists and the user has access to it
-      const hasBoard = await Board.exists({
+    await session.withTransaction(async () => {
+      // 2. Verify that the board exists with the user as owner or is a board member
+      const userOwnsBoard = await Board.findOne({
         _id: boardId,
         user_id: userId,
-      }).session(session);
-      if (!hasBoard) {
-        throw new Error("Board not found");
+      })
+        .lean()
+        .session(session)
+        .exec();
+
+      const userIsBoardMember = await BoardMember.findOne({
+        user_id: userId,
+        board_id: boardId,
+      })
+        .lean()
+        .session(session)
+        .exec();
+
+      if (!userOwnsBoard && !userIsBoardMember) {
+        throw new Error("Board not found or access denied");
       }
 
       // 3. Verify that the same list title (case-insensitive) doesn't exist for the same board
       const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const duplicate = await List.exists({
+      const duplicate = await List.findOne({
         title: {
           $regex: new RegExp(`^${escapedTitle}$`, "i"),
         },
-        userId,
         boardId,
-      }).session(session);
+      })
+        .lean()
+        .session(session)
+        .exec();
 
       if (duplicate) {
         throw new Error(
@@ -57,10 +72,19 @@ const CreateListService = async (
       }
 
       // 4. Create the list using transaction
+      const getUserFromBoard = await Board.findById(boardId)
+        .select("user_id")
+        .lean()
+        .session(session)
+        .exec();
+      if (!getUserFromBoard) {
+        throw new Error("User ID of the board not found");
+      }
+
       const newList = new List({
         title,
         boardId,
-        userId,
+        userId: getUserFromBoard.user_id,
         status,
         position,
       });
@@ -68,9 +92,9 @@ const CreateListService = async (
       const createdList = await newList.save({ session });
 
       // 5. Add the list to the board
-      await Board.findOneAndUpdate(
-        { _id: boardId, user_id: userId },
-        { $addToSet: { lists: createdList._id } },
+      await Board.updateOne(
+        { _id: boardId },
+        { $addToSet: { lists: createdList?._id } },
         { session },
       );
 
@@ -113,6 +137,13 @@ const CreateListService = async (
 
     // Handle transaction errors
     if (error instanceof Error) {
+      if (error.message === "User ID of the board not found") {
+        return {
+          success: false,
+          message: "User ID of the board not found",
+        };
+      }
+
       if (error.message === "Board not found") {
         return {
           success: false,

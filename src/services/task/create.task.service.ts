@@ -82,7 +82,7 @@ const CreateTaskService = async (
         .exec();
 
       if (!userOwnsList && !userIsBoardMember) {
-        throw new Error("Access denied");
+        throw new Error("Task not found or access denied");
       }
 
       // 3. Create the task and add the task id to the list's tasks array
@@ -140,10 +140,10 @@ const CreateTaskService = async (
     }
 
     if (error instanceof Error) {
-      if (error.message === "Access denied") {
+      if (error.message === "Task not found or access denied") {
         return {
           success: false,
-          message: "Access denied",
+          message: "Task not found or access denied",
         };
       }
 

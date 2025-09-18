@@ -40,30 +40,34 @@ const UpdateTaskService = async (
       };
     }
 
-    const board = await GetBoardId({ taskId: task});
+    const board = await GetBoardId({ taskId: task });
     const boardId = board.board?.id;
     if (!boardId) {
       return {
         success: false,
-        message: board.message
-      }
+        message: board.message ?? "Board for task not found",
+      };
     }
 
-    // 2. Verify that the user owns the task's list or is a board member 
+    // 2. Verify that the user owns the task's list or is a board member
     const listWithUser = await List.findOne({
       tasks: task,
       userId,
-    }).lean().exec();
+    })
+      .lean()
+      .exec();
 
     const userIsBoardMember = await BoardMember.findOne({
       user_id: userId,
-      board_id: boardId
-    }).lean().exec();
+      board_id: boardId,
+    })
+      .lean()
+      .exec();
 
     if (!listWithUser && !userIsBoardMember) {
       return {
         success: false,
-        message: "Access denied",
+        message: "Task not found or access denied",
       };
     }
 
@@ -78,12 +82,15 @@ const UpdateTaskService = async (
     }
 
     // 3b. Verify that the update list Id is different from DB list Id
-    const listForTask = await Task.findById(task).select("listId").lean().exec();
-    if (!listForTask?.listId) {
+    const listForTask = await Task.findById(task)
+      .select("listId")
+      .lean()
+      .exec();
+    if (!listForTask || !listForTask.listId) {
       return {
         success: false,
-        message: "Task has no current list"
-      }
+        message: "Task has no current list",
+      };
     }
 
     if (listId && listForTask.listId?.toString() !== listId) {
@@ -92,7 +99,6 @@ const UpdateTaskService = async (
 
       try {
         await session.withTransaction(async () => {
-
           // 3c. Remove the task from its current list
           const removeTaskList = await List.updateOne(
             {
@@ -133,7 +139,9 @@ const UpdateTaskService = async (
             task,
             newUpdateData,
             { new: true, runValidators: true },
-          ).session(session).exec();
+          )
+            .session(session)
+            .exec();
           if (!updatedTask) {
             throw new Error("Error while updating task");
           }

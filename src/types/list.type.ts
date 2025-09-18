@@ -51,13 +51,31 @@ export type ReadListOutputType = z.infer<typeof ReadListOutputSchema>;
 
 export const UpdateListInputSchema = z
   .object({
-    title: z.string().optional(),
+    title: z.string().nonempty().optional(),
     position: z.number().optional(),
     status: z.enum(["active", "archive"]).optional(),
   })
   .strict();
 
 export type UpdateListInputType = z.infer<typeof UpdateListInputSchema>;
+
+const UpdateListOutputSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+  list: z
+    .object({
+      title: z.string(),
+      id: z.string(),
+      status: z.enum(["active", "archive"]),
+      position: z.number(),
+      userId: z.string(),
+      boardId: z.string(),
+      tasks: z.array(z.string()),
+    })
+    .optional(),
+});
+
+export type UpdateListOutputType = z.infer<typeof UpdateListOutputSchema>;
 
 const DeleteListOutputSchema = z.object({
   success: z.boolean(),
@@ -67,6 +85,10 @@ const DeleteListOutputSchema = z.object({
       title: z.string(),
       position: z.number(),
       status: z.enum(["active", "archive"]),
+      boardId: z.string(),
+      userId: z.string(),
+      id: z.string(),
+      tasks: z.array(z.string()),
     })
     .optional(),
 });
