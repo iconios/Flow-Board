@@ -1,6 +1,6 @@
 /*
 #Plan: Get All the Members of a owner's Board
-1. Receive and validate the owner, board
+1. Receive and validate the owner, user or board
 2. Retrieve the Members associated with a Board 
 3. Send the details to the client
 */

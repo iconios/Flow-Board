@@ -56,19 +56,21 @@ const CreateMemberService = async (
 
     const [boardWithOwnerExists, boardMemberExists, memberExists] =
       await Promise.all([
-        Board.findOne({ _id: boardId, user_id: ownerId }).exec(),
-        User.findById(userId).exec(),
+        Board.findOne({ _id: boardId, user_id: ownerId }).lean().exec(),
+        User.findById(userId).lean().exec(),
         BoardMember.findOne<MemberType>({
           board_id: boardId,
           user_id: userId,
-        }).exec(),
+        })
+          .lean()
+          .exec(),
       ]);
 
     // 2. Verify that the board exists with the owner as the userid field value
     if (!boardWithOwnerExists) {
       return {
         success: false,
-        message: "Board not found or you don't have permission to add members",
+        message: "Board not found or access denied",
       };
     }
 
@@ -96,6 +98,7 @@ const CreateMemberService = async (
         member: {
           memberId: memberExists._id.toString(),
           boardId: memberExists.board_id.toString(),
+          userId: memberExists.user_id.toString(),
           role: memberExists.role,
         },
       };
@@ -122,6 +125,7 @@ const CreateMemberService = async (
       member: {
         memberId: createdMember._id.toString(),
         boardId: createdMember.board_id.toString(),
+        userId: createdMember.user_id.toString(),
         role: createdMember.role,
       },
     };

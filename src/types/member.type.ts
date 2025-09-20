@@ -24,6 +24,7 @@ const MemberCreateOutputSchema = z.object({
     .object({
       memberId: z.string(),
       boardId: z.string(),
+      userId: z.string(),
       role: z.string(),
     })
     .optional(),

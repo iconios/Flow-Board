@@ -13,6 +13,8 @@ import ListRouter from "./controllers/list.controller.js";
 import TaskRouter from "./controllers/task.controller.js";
 import ActivityRouter from "./controllers/activity.controller.js";
 import CommentRouter from "./controllers/comment.controller.js";
+import TokenExtraction from "./middlewares/token.extraction.util.js";
+import SocketTokenExtraction from "./middlewares/socket.token.extraction.util.js";
 dotenv.config();
 
 // Initialize all variables or constants
@@ -56,7 +58,7 @@ app.get("/health", (_req, res) => res.sendStatus(200));
 app.use("/user", UserRouter);
 app.use("/auth", AuthRouter);
 app.use("/board", BoardRouter);
-app.use("/boardmember", BoardMemberRouter);
+app.use("/member", BoardMemberRouter);
 app.use("/list", ListRouter);
 app.use("/task", TaskRouter);
 app.use("/activity", ActivityRouter);
@@ -68,8 +70,9 @@ app.all(/(.*)/, (req: Request, res: Response) => {
 });
 
 // Initialize the socket.io connections
+io.use(SocketTokenExtraction);
 io.on("connection", (socket) => {
-  console.log("A user connected");
+  console.log(`User ${socket.id} connected`);
 
   socket.on("disconnect", () => {
     console.log("User disconnected");

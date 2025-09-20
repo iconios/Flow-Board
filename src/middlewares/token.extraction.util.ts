@@ -28,7 +28,7 @@ const TokenExtraction = async (
   if (!auth) {
     return res.status(401).json({
       success: false,
-      message: "Unauthorization header amiss",
+      message: "Authorization header missing",
     });
   }
 
