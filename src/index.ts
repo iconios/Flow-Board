@@ -13,8 +13,9 @@ import ListRouter from "./controllers/list.controller.js";
 import TaskRouter from "./controllers/task.controller.js";
 import ActivityRouter from "./controllers/activity.controller.js";
 import CommentRouter from "./controllers/comment.controller.js";
-import TokenExtraction from "./middlewares/token.extraction.util.js";
 import SocketTokenExtraction from "./middlewares/socket.token.extraction.util.js";
+import JoinRoomUtility from "./utils/join.room.util.js";
+import LeaveRoomUtility from "./utils/leave.room.util.js";
 dotenv.config();
 
 // Initialize all variables or constants
@@ -73,6 +74,12 @@ app.all(/(.*)/, (req: Request, res: Response) => {
 io.use(SocketTokenExtraction);
 io.on("connection", (socket) => {
   console.log(`User ${socket.id} connected`);
+
+  // Socket join room
+  socket.on("room:join", JoinRoomUtility);
+
+  // Socket leave room
+  socket.on("room:leave", LeaveRoomUtility);
 
   socket.on("disconnect", () => {
     console.log("User disconnected");

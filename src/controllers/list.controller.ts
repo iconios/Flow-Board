@@ -47,11 +47,18 @@ ListRouter.get(
 );
 
 // Create a List in a Board API
+/*
+#Plan: -------------------------------------------------------------------
+1. Get and validate the user id, board id and list data
+2. Pass the data to the CreateListService
+3. Emit and send the created list details to the board members and board owner
+*/
 ListRouter.post(
   "/:boardId",
   TokenExtraction,
   async (req: Request, res: Response) => {
     try {
+      // 1. Get and validate the user id, board id and list data
       const userId = req.userId!;
       const boardId = req.params.boardId?.trim();
       console.log("Received board id", boardId);
@@ -68,12 +75,27 @@ ListRouter.post(
         ...inputs,
       };
 
+      // 2. Pass the data to the CreateListService
       const result = await CreateListService(userId, boardData);
       if (!result.success) {
         return res.status(400).json({
           success: result.success,
           message: result.message,
         });
+      }
+
+      // 3. Emit and send the created list details to the board members and board owner
+      const io = req.io;
+      if (io && result.list) {
+        const room = `boardId-${boardId}`;
+        const sockets = await io.in(room).fetchSockets();
+        if (sockets.length > 0) {
+          io.in(room).emit("list:created", {
+            message: result.message,
+            list: result.list,
+          });
+          console.log("Updated list details emitted", result.list);
+        }
       }
 
       return res.status(201).json({
@@ -93,11 +115,18 @@ ListRouter.post(
 );
 
 // Update List in a Board API
+/*
+#Plan: -------------------------------------------------------------------
+1. Get and validate the user id, list id and list data
+2. Pass the data to the UpdateListService
+3. Emit and send the updated list details to the board members and board owner
+*/
 ListRouter.patch(
   "/:listId",
   TokenExtraction,
   async (req: Request, res: Response) => {
     try {
+      // 1. Get and validate the user id, list id and list data
       const userId = req.userId!;
       const listId = req.params.listId?.trim();
       if (!listId) {
@@ -114,12 +143,26 @@ ListRouter.patch(
         });
       }
 
+      // 2. Pass the data to the UpdateListService
       const result = await UpdateListService(listId, userId, updateData);
       if (!result.success) {
         return res.status(400).json({
           success: false,
           message: result.message,
         });
+      }
+
+      // 3. Emit and send the updated list details to the board members and board owner
+      const io = req.io;
+      if (io && result.list) {
+        const room = `listId-${listId}`;
+        const sockets = await io.in(room).fetchSockets();
+        if (sockets.length > 0) {
+          io.in(room).emit("list:updated", {
+            message: result.message,
+            list: result.list,
+          });
+        }
       }
 
       return res.status(200).json({
@@ -139,10 +182,17 @@ ListRouter.patch(
 );
 
 // Delete Lists for a Board API
+/*
+#Plan: -------------------------------------------------------------------
+1. Get and validate the user id, and the list id
+2. Pass the data to the DeleteListService
+3. Emit and send the deleted list details to the board members and board owner
+*/
 ListRouter.delete(
   "/:listId",
   TokenExtraction,
   async (req: Request, res: Response) => {
+    // 1. Get and validate the user id, and the list id
     try {
       const listId = req.params.listId?.trim();
       if (!listId) {
@@ -160,12 +210,26 @@ ListRouter.delete(
         });
       }
 
+      // 2. Pass the data to the DeleteListService
       const result = await DeleteListService(userId, listId);
       if (!result.success) {
         return res.status(404).json({
           success: result.success,
           message: result.message,
         });
+      }
+
+      // 3. Emit and send the deleted list details to the board members and board owner
+      const io = req.io;
+      if (io && result.list) {
+        const room = `listId-${listId}`;
+        const sockets = await io.in(room).fetchSockets();
+        if (sockets.length > 0) {
+          io.in(room).emit("list:deleted", {
+            message: result.message,
+            list: result.list,
+          });
+        }
       }
 
       return res.status(200).json({
