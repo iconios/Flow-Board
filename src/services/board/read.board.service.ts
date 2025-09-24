@@ -1,8 +1,8 @@
 /*
 #Plan:
 1. Get and validate the user id
-2. Get the boards of the user from the DB
-3. Send the data to the client
+2. 2. Get the boards of the user, all the IDs and the boards the user is a member of
+3. Send all the boards data to the user
 */
 
 import { MongooseError, Types } from "mongoose";
@@ -11,6 +11,7 @@ import type {
   BoardDetailsType,
   BoardReadOutputType,
 } from "../../types/board.type.js";
+import BoardMember from "../../models/boardMember.model.js";
 
 const ReadBoardService = async (
   user_id: string,
@@ -25,16 +26,26 @@ const ReadBoardService = async (
       };
     }
 
-    // 2. Get the boards of the user from the DB
-    const boards = await Board.find<BoardDetailsType>({ user_id: id })
-      .select("-user_id")
+    // 2. Get the boards of the user, all the IDs and the boards the user is a member of
+    const boardIDsUserIsMember = await BoardMember.find({ user_id })
+      .select("board_id")
+      .exec();
+    const boardIds = boardIDsUserIsMember.map((board) => board.board_id);
+
+    const userBoardOrIsMember = await Board.find<BoardDetailsType>({
+      $or: [
+        { _id: { $in: boardIds } }, 
+        { user_id: id }
+      ]
+    })
+      .populate("user_id")
       .exec();
 
-    // 3. Send the data to the client
+    // 3. Send all the boards data to the user
     return {
       success: true,
       message: "Boards retrieved",
-      boards,
+      boards: userBoardOrIsMember,
     };
   } catch (error) {
     console.error(`Error retrieving boards for ${user_id}`, error);
