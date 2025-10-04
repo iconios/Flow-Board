@@ -22,15 +22,21 @@ dotenv.config();
 const app = express();
 const server = createServer(app);
 const PORT = process.env.PORT;
-const io = new Server(server);
+const io = new Server(server, {
+  path: "/socket.io",
+  cors: { 
+    origin: ["http://localhost:3000"], 
+    credentials: true 
+  },
+});
 
 // Enable express middleware
 app.use(
   cors({
     origin: [
-      "http://localhost:3001",
-      "http://127.0.0.1:3001",
-      "https://localhost:3001",
+      "http://localhost:3000",
+      "http://127.0.0.1:3000",
+      "https://localhost:3000",
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"],
@@ -84,6 +90,19 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("User disconnected");
   });
+});
+
+io.engine.on("connection_error", (error) => {
+  // Fires when the handshake fails before a socket is created
+  console.error("Engine connection_error:", {
+    code: error.code,
+    message: error.message,
+    context: error.context,
+  });
+})
+
+io.engine.on("initial_headers", (headers, req) => {
+  console.log("WS/Poll init:", req.urlencoded)
 });
 
 // Initialize the http server to start listening for requests
