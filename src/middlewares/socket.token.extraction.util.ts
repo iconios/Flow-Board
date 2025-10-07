@@ -7,6 +7,7 @@
 
 import type { ExtendedError, Socket } from "socket.io";
 import jwt from "jsonwebtoken";
+import cookie from 'cookie';
 import * as dotenv from "dotenv";
 dotenv.config();
 
@@ -17,26 +18,23 @@ const SocketTokenExtraction = (
   next: (err?: ExtendedError | undefined) => void,
 ) => {
   // 1. Receive the socket auth data and retrieve the token
-  const auth = socket.handshake.auth?.token;
-  if (!auth) {
+  const header = socket.request.headers.cookie || "";
+  if (!header) {
     return next(new Error("Authorization header missing"));
-  }
-
-  const [scheme, token] = auth.split(" ");
-  if (scheme?.toLowerCase() !== "bearer") {
-    return next(new Error("Invalid scheme"));
-  }
+  }  
+  const cookies = cookie.parse(header);      
+  const token = cookies.token; 
 
   if (!token) {
-    return next(new Error("Token missing"));
+    return next(new Error("Not authenticated"));
+  }
+
+  // 2. Validate the token
+  if (!JWT_SECRET) {
+    return next(new Error("Fatal error. JWT token undefined"));
   }
 
   try {
-    // 2. Validate the token
-    if (!JWT_SECRET) {
-      return next(new Error("Fatal error. JWT token undefined"));
-    }
-
     const decodedToken = jwt.verify(token, JWT_SECRET, {
       algorithms: ["HS256"],
     });
