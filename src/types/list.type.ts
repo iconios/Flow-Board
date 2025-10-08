@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TaskSchema } from "./task.type.js";
 
 export const CreateListInputSchema = z
   .object({
@@ -42,12 +43,24 @@ const ReadListOutputSchema = CreateListOutputSchema.pick({
         position: z.number(),
         status: z.enum(["active", "archive"]),
         boardId: z.string(),
+        tasks: z.array(TaskSchema)
       }),
     )
     .optional(),
 });
 
 export type ReadListOutputType = z.infer<typeof ReadListOutputSchema>;
+
+const ListOutputSchema = z.object({
+        _id: z.string(),
+        title: z.string(),
+        userId: z.string(),
+        position: z.number(),
+        status: z.enum(["active", "archive"]),
+        boardId: z.string(),
+        tasks: z.array(TaskSchema)
+      });
+export type ListsOutputType = z.infer<typeof ListOutputSchema>;
 
 export const UpdateListInputSchema = z
   .object({

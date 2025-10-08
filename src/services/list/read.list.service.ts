@@ -8,8 +8,9 @@
 import { MongooseError, Types } from "mongoose";
 import Board from "../../models/board.model.js";
 import List from "../../models/list.model.js";
-import type { ReadListOutputType } from "../../types/list.type.js";
+import type { ListsOutputType, ReadListOutputType } from "../../types/list.type.js";
 import BoardMember from "../../models/boardMember.model.js";
+import type { TaskType } from "../../types/task.type.js";
 
 const ReadListService = async (
   userId: string,
@@ -48,10 +49,17 @@ const ReadListService = async (
     }
 
     // 3. Send the board's lists to the user
-    const boardLists = await List.find({ boardId })
+    const boardLists = await List.find<ListsOutputType>({ boardId })
       .sort({ position: 1, _id: 1 })
       .select("-userId")
+      .populate<{ tasks: TaskType[] }>({
+        path: 'tasks',
+        select: '_id title description dueDate priority position listId',
+        options: { lean: true },      
+      })
+      .lean()
       .exec();
+
     if (boardLists.length === 0) {
       return {
         success: true,
@@ -66,6 +74,15 @@ const ReadListService = async (
       position: list.position,
       status: list.status,
       boardId: list.boardId.toString(),
+      tasks: list.tasks.map((task) => ({
+        _id: task._id.toString(),
+        description: task.description ?? "",
+        title: task.title,
+        dueDate: task.dueDate ?? "",
+        priority: task.priority,
+        position: task.position ?? 0,
+        listId: task.listId?.toString() ?? ""
+      })),
     }));
 
     return {

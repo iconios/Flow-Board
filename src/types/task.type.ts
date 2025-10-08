@@ -40,7 +40,7 @@ export const UpdateTaskInputSchema = z
     title: z.string().min(2, "Minimum of two characters required").optional(),
     description: z
       .string()
-      .max(255, "Maximum of 100 characters allowed")
+      .max(255, "Maximum of 255 characters allowed")
       .optional(),
     dueDate: z.iso.datetime().optional(),
     priority: z.enum(["low", "medium", "high", "critical"]).optional(),
@@ -86,3 +86,17 @@ const UpdateTaskOutputSchema = z.object({
 });
 
 export type UpdateTaskOutputType = z.infer<typeof UpdateTaskOutputSchema>;
+
+export const TaskSchema = z.object({
+  _id: z.string(),
+  title: z.string().min(2, "Minimum of two characters required"),
+    description: z
+      .string()
+      .max(255, "Maximum of 255 characters allowed"),
+    dueDate: z.iso.datetime(),
+    priority: z.enum(["low", "medium", "high", "critical"]),
+    position: z.number(),
+    listId: z.string().nonempty()
+})
+
+export type TaskType = z.infer<typeof TaskSchema>

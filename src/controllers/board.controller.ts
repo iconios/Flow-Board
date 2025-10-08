@@ -9,6 +9,14 @@ const BoardRouter = express.Router();
 
 // Create a Board API
 BoardRouter.post("/", TokenExtraction, async (req: Request, res: Response) => {
+  const body = { ...req.body };
+  if (!body || Object.keys(body).length < 2) {
+    console.log("Faulty create board object received", body);
+    return res.status(400).json({
+      success: false,
+      message: `Bad request. Received as body ${body}`
+    })
+  }
   try {
     const boardInput = {
       user_id: req.userId,
