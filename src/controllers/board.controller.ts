@@ -14,8 +14,8 @@ BoardRouter.post("/", TokenExtraction, async (req: Request, res: Response) => {
     console.log("Faulty create board object received", body);
     return res.status(400).json({
       success: false,
-      message: `Bad request. Received as body ${body}`
-    })
+      message: `Bad request. Received as body ${body}`,
+    });
   }
   try {
     const boardInput = {

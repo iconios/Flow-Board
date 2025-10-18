@@ -7,7 +7,7 @@
 
 import type { ExtendedError, Socket } from "socket.io";
 import jwt from "jsonwebtoken";
-import cookie from 'cookie';
+import cookie from "cookie";
 import * as dotenv from "dotenv";
 dotenv.config();
 
@@ -21,9 +21,9 @@ const SocketTokenExtraction = (
   const header = socket.request.headers.cookie || "";
   if (!header) {
     return next(new Error("Authorization header missing"));
-  }  
-  const cookies = cookie.parse(header);      
-  const token = cookies.token; 
+  }
+  const cookies = cookie.parse(header);
+  const token = cookies.token;
 
   if (!token) {
     return next(new Error("Not authenticated"));

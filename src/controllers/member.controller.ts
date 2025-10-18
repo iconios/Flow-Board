@@ -4,8 +4,40 @@ import ReadMemberService from "../services/member/read.member.service.js";
 import CreateMemberService from "../services/member/create.member.service.js";
 import DeleteMemberService from "../services/member/delete.member.service.js";
 import RateLimiter from "../utils/rateLimit.util.js";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+import VerifyBoardMemberService from "../services/member/verify.member.service.js";
 
 const BoardMemberRouter = express.Router();
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// Board Membership Acceptance API
+BoardMemberRouter.get(
+  "/accept-invite-email",
+  async (req: Request, res: Response) => {
+    // Validate the token exists
+    const query = req.query.t;
+    const token = Array.isArray(query) ? query[0] : query;
+    if (typeof token !== "string" || !token) {
+      res.status(400).sendFile(join(__dirname, "expired-token.html"));
+      return;
+    }
+
+    // Show the user the proper message
+    const result = await VerifyBoardMemberService(token);
+    if (!result.success) {
+      console.log("Expired token handler hit");
+      res.status(400).sendFile(join(__dirname, "expired-token.html"));
+      return;
+    }
+
+    console.log("Successful token verification handler hit");
+    res
+      .status(200)
+      .sendFile(join(__dirname, "successful-membership-acceptance.html"));
+  },
+);
+
 BoardMemberRouter.get(
   "/:boardId",
   TokenExtraction,

@@ -9,8 +9,8 @@ import { Types } from "mongoose";
 import BoardMember from "../../models/boardMember.model.js";
 import {
   ReadMemberInputSchema,
+  type BoardMemberReadOutputType,
   type MemberReadOutputType,
-  type MemberType,
   type ReadMemberInputType,
 } from "../../types/member.type.js";
 import Board from "../../models/board.model.js";
@@ -20,14 +20,21 @@ const ReadMemberService = async (
 ): Promise<MemberReadOutputType> => {
   try {
     // 1. Receive and validate the owner, user or board
-    const validatedInput = ReadMemberInputSchema.parse(readMemberInput);
-    const boardId = validatedInput.boardId;
-    const ownerId = validatedInput.ownerId;
+    const { boardId, ownerId } = ReadMemberInputSchema.parse(readMemberInput);
 
     if (!Types.ObjectId.isValid(boardId)) {
       return {
         success: false,
         message: "Invalid board ID",
+        members: [],
+      };
+    }
+
+    if (!Types.ObjectId.isValid(ownerId)) {
+      return {
+        success: false,
+        message: "Invalid board owner ID",
+        members: [],
       };
     }
 
@@ -37,28 +44,55 @@ const ReadMemberService = async (
       return {
         success: false,
         message: "Board not found",
+        members: [],
       };
     }
 
+    // Ensure the owner owns the board indeed
     if (board.user_id.toString() !== ownerId) {
       return {
         success: false,
         message: "Unauthorized access",
+        members: [],
       };
     }
 
-    const members = await BoardMember.find<MemberType>({
+    // Fetch the verified members associated with a board
+    const membersFound = (await BoardMember.find({
       board_id: boardId,
-    }).exec();
+      isVerified: true,
+    })
+      .populate("user_id")
+      .lean()
+      .exec()) as unknown as BoardMemberReadOutputType[];
+
+    if (membersFound.length === 0) {
+      return {
+        success: true,
+        message: "No members found for the board",
+        members: [],
+      };
+    }
 
     // 3. Send the details to the client
+    const membersToReturn = membersFound.map((member) => ({
+      memberId: member._id.toString(),
+      boardId: member.board_id.toString(),
+      user: {
+        userId: member.user_id._id.toString(),
+        firstname: member.user_id.firstname,
+        email: member.user_id.email,
+      },
+      role: member.role,
+    }));
+
     return {
       success: true,
       message:
-        members.length > 0
+        membersToReturn.length > 0
           ? "Board members retrieved successfully"
           : "No members found",
-      members,
+      members: membersToReturn ?? [],
     };
   } catch (error) {
     console.error("Error retrieving the board members", error);
@@ -66,6 +100,7 @@ const ReadMemberService = async (
     return {
       success: false,
       message: "Error retrieving the board members",
+      members: [],
     };
   }
 };

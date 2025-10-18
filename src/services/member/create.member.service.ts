@@ -1,12 +1,14 @@
 /*
 Plan: 
-1. Accept and validate owner id, board id, user id, and user role (if available)
+1. Accept and validate owner id, board id, user email, and user role (if available)
 2. Verify that the board exists with the owner as the userid field value
 3. Verify that the user (board member) exists
 4. Verify that the owner is not the same as user
 5. Verify that the board member doesn't already exist for the board
-6. Create the member
-7. Send op status to the client
+6. Get the details of the board owner
+7. Create the member
+8. Send board invite to the user
+9. Send op status to the client
 */
 
 import { ZodError } from "zod";
@@ -20,13 +22,14 @@ import BoardMember from "../../models/boardMember.model.js";
 import { MongooseError, Types } from "mongoose";
 import Board from "../../models/board.model.js";
 import User from "../../models/user.model.js";
+import { sendMemberInvite } from "../../utils/mailer.util.js";
 
 const CreateMemberService = async (
   boardOwner: string,
   createMemberInput: MemberCreateInputType,
 ): Promise<MemberCreateOutputType> => {
   try {
-    // 1. Accept and validate owner id, board id, user id, and user role (if available)
+    // 1. Accept and validate owner id, board id, user email, and user role (if available)
     const validatedInput = CreateMemberInputSchema.parse(createMemberInput);
     const boardId = validatedInput.board_id;
     if (!Types.ObjectId.isValid(boardId)) {
@@ -36,14 +39,16 @@ const CreateMemberService = async (
       };
     }
 
-    const userId = validatedInput.user_id;
-    if (!Types.ObjectId.isValid(userId)) {
+    const userEmail = validatedInput.userEmail;
+    const userFound = await User.findOne({ email: userEmail }).lean().exec();
+    if (!userFound) {
       return {
-        success: false,
-        message: "Invalid user id",
+        success: true,
+        message:
+          "Inform the user to check his/her email to accept the board member invite",
       };
     }
-
+    const userId = userFound._id.toString();
     const ownerId = boardOwner.trim();
     if (!Types.ObjectId.isValid(ownerId)) {
       return {
@@ -54,17 +59,22 @@ const CreateMemberService = async (
 
     const role = validatedInput.role ?? "member";
 
-    const [boardWithOwnerExists, boardMemberExists, memberExists] =
-      await Promise.all([
-        Board.findOne({ _id: boardId, user_id: ownerId }).lean().exec(),
-        User.findById(userId).lean().exec(),
-        BoardMember.findOne<MemberType>({
-          board_id: boardId,
-          user_id: userId,
-        })
-          .lean()
-          .exec(),
-      ]);
+    const [
+      boardWithOwnerExists,
+      boardMemberExists,
+      memberExists,
+      boardOwnerDetails,
+    ] = await Promise.all([
+      Board.findOne({ _id: boardId, user_id: ownerId }).lean().exec(),
+      User.findById(userId).lean().exec(),
+      BoardMember.findOne<MemberType>({
+        board_id: boardId,
+        user_id: userId,
+      })
+        .lean()
+        .exec(),
+      User.findById({ _id: ownerId }).select("firstname").lean().exec(),
+    ]);
 
     // 2. Verify that the board exists with the owner as the userid field value
     if (!boardWithOwnerExists) {
@@ -91,7 +101,7 @@ const CreateMemberService = async (
     }
 
     // 5. Verify that the member doesn't already exist for the board
-    if (memberExists) {
+    if (memberExists && memberExists.isVerified) {
       return {
         success: true,
         message: "Member already exists for this board",
@@ -104,12 +114,27 @@ const CreateMemberService = async (
       };
     }
 
-    // 6. Create the member
+    // 6. Get the details of the board owner
+    if (!boardOwnerDetails) {
+      return {
+        success: false,
+        message: "Board owner doesn't exist",
+      };
+    }
+
+    // Delete unverified member
+    if (memberExists && !memberExists.isVerified) {
+      await BoardMember.findByIdAndDelete(memberExists._id).exec();
+    }
+
+    // 7. Create the member
     const member = new BoardMember({
       board_id: boardId,
       user_id: userId,
       role,
     });
+    await member.generateVerificationToken();
+
     const createdMember = await member.save();
     if (!createdMember) {
       return {
@@ -118,20 +143,23 @@ const CreateMemberService = async (
       };
     }
 
-    // 7. Send op status to the client
+    // 8. Send board invite to the user
+    sendMemberInvite(
+      userEmail,
+      userFound.firstname,
+      createdMember.verificationToken,
+      boardOwnerDetails.firstname,
+    );
+
+    // 9. Send op status to the client
     return {
       success: true,
-      message: "Member successfully created",
-      member: {
-        memberId: createdMember._id.toString(),
-        boardId: createdMember.board_id.toString(),
-        userId: createdMember.user_id.toString(),
-        role: createdMember.role,
-      },
+      message:
+        "Inform the user to check his/her email to accept the board member invite",
     };
   } catch (error) {
     console.error(
-      `Error creating ${createMemberInput.user_id} as a member for ${createMemberInput.board_id}`,
+      `Error creating ${createMemberInput.userEmail} as a member for ${createMemberInput.board_id}`,
       error,
     );
 

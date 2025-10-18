@@ -33,10 +33,7 @@ const ReadBoardService = async (
     const boardIds = boardIDsUserIsMember.map((board) => board.board_id);
 
     const userBoardOrIsMember = await Board.find<BoardDetailsType>({
-      $or: [
-        { _id: { $in: boardIds } }, 
-        { user_id: id }
-      ]
+      $or: [{ _id: { $in: boardIds } }, { user_id: id }],
     })
       .populate("user_id")
       .exec();

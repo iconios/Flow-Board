@@ -8,7 +8,10 @@
 import { MongooseError, Types } from "mongoose";
 import Board from "../../models/board.model.js";
 import List from "../../models/list.model.js";
-import type { ListsOutputType, ReadListOutputType } from "../../types/list.type.js";
+import type {
+  ListsOutputType,
+  ReadListOutputType,
+} from "../../types/list.type.js";
 import BoardMember from "../../models/boardMember.model.js";
 import type { TaskType } from "../../types/task.type.js";
 
@@ -53,9 +56,9 @@ const ReadListService = async (
       .sort({ position: 1, _id: 1 })
       .select("-userId")
       .populate<{ tasks: TaskType[] }>({
-        path: 'tasks',
-        select: '_id title description dueDate priority position listId',
-        options: { lean: true },      
+        path: "tasks",
+        select: "_id title description dueDate priority position listId",
+        options: { lean: true },
       })
       .lean()
       .exec();
@@ -81,7 +84,7 @@ const ReadListService = async (
         dueDate: task.dueDate ?? "",
         priority: task.priority,
         position: task.position ?? 0,
-        listId: task.listId?.toString() ?? ""
+        listId: task.listId?.toString() ?? "",
       })),
     }));
 

@@ -91,7 +91,7 @@ export type TokenType = z.infer<typeof TokenSchema>;
 
 export const UserEmailSchema = z.object({
   email: z.email(),
-})
+});
 export type UserEmailType = z.infer<typeof UserEmailSchema>;
 
 const UserLoginMessageSchema = z.object({

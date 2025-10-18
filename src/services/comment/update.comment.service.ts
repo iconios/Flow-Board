@@ -39,10 +39,10 @@ const UpdateCommentService = async (
         _id: comment,
         userId,
       },
-      { $set: validatedInput, $currentDate: { updatedAt: true }
-      },
+      { $set: validatedInput, $currentDate: { updatedAt: true } },
       {
-        new: true, runValidators: true
+        new: true,
+        runValidators: true,
       },
     ).exec();
     if (!userOwnsCommentAndUpdated) {

@@ -4,7 +4,6 @@ import crypto from "node:crypto";
 import * as dotenv from "dotenv";
 dotenv.config();
 
-const SALT_ROUNDS = Number(process.env.SALT_ROUNDS);
 const UserSchema = new mongoose.Schema(
   {
     email: {

@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Board Membership Verified Successfully</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 500px;
+        width: 100%;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        padding: 40px;
+        text-align: center;
+      }
+
+      .success-icon {
+        width: 80px;
+        height: 80px;
+        background: #d1fae5;
+        border-radius: 50%;
+        margin: 0 auto 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #10b981;
+        font-size: 36px;
+      }
+
+      h1 {
+        color: #111827;
+        margin-bottom: 15px;
+        font-weight: 600;
+      }
+
+      p {
+        color: #4b5563;
+        margin-bottom: 10px;
+        line-height: 1.6;
+        font-size: 16px;
+      }
+
+      .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 30px;
+      }
+
+      .btn {
+        padding: 14px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        display: block;
+      }
+
+      .btn-primary {
+        background: #4f46e5;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #4338ca;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+      }
+
+      .btn-secondary {
+        background: transparent;
+        color: #4b5563;
+        border: 1px solid #d1d5db;
+      }
+
+      .btn-secondary:hover {
+        background: #f9fafb;
+        transform: translateY(-2px);
+      }
+
+      .support {
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #f3f4f6;
+        font-size: 14px;
+        color: #6b7280;
+      }
+
+      .support a {
+        color: #4f46e5;
+        text-decoration: none;
+        font-weight: 500;
+      }
+
+      @media (max-width: 576px) {
+        .container {
+          padding: 30px 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="success-icon">✓</div>
+      <h1>Board Membership Accepted and Verified Successfully!</h1>
+      <p>Your board membership has been verified</p>
+      <p>
+        Thank you for accepting the board membership request. You can now manage
+        the lists and tasks on the board.
+      </p>
+
+      <div class="action-buttons">
+        <a href="http://www.nerdywebconsults.ng" class="btn btn-primary"
+          >Continue to Your Dashboard</a
+        >
+      </div>
+
+      <div class="support">
+        <p>Need help? <a href="#">Contact our support team</a></p>
+      </div>
+    </div>
+  </body>
+</html>

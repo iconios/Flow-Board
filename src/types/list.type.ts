@@ -43,7 +43,7 @@ const ReadListOutputSchema = CreateListOutputSchema.pick({
         position: z.number(),
         status: z.enum(["active", "archive"]),
         boardId: z.string(),
-        tasks: z.array(TaskSchema)
+        tasks: z.array(TaskSchema),
       }),
     )
     .optional(),
@@ -52,14 +52,14 @@ const ReadListOutputSchema = CreateListOutputSchema.pick({
 export type ReadListOutputType = z.infer<typeof ReadListOutputSchema>;
 
 const ListOutputSchema = z.object({
-        _id: z.string(),
-        title: z.string(),
-        userId: z.string(),
-        position: z.number(),
-        status: z.enum(["active", "archive"]),
-        boardId: z.string(),
-        tasks: z.array(TaskSchema)
-      });
+  _id: z.string(),
+  title: z.string(),
+  userId: z.string(),
+  position: z.number(),
+  status: z.enum(["active", "archive"]),
+  boardId: z.string(),
+  tasks: z.array(TaskSchema),
+});
 export type ListsOutputType = z.infer<typeof ListOutputSchema>;
 
 export const UpdateListInputSchema = z

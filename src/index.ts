@@ -24,9 +24,9 @@ const server = createServer(app);
 const PORT = process.env.PORT;
 const io = new Server(server, {
   path: "/socket.io",
-  cors: { 
-    origin: ["http://localhost:3000"], 
-    credentials: true 
+  cors: {
+    origin: ["http://localhost:3000"],
+    credentials: true,
   },
 });
 
@@ -99,10 +99,10 @@ io.engine.on("connection_error", (error) => {
     message: error.message,
     context: error.context,
   });
-})
+});
 
 io.engine.on("initial_headers", (headers, req) => {
-  console.log("WS/Poll init:", req.urlencoded)
+  console.log("WS/Poll init:", req.urlencoded);
 });
 
 // Initialize the http server to start listening for requests

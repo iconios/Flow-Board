@@ -1,7 +1,7 @@
 /*
 #Plan:
 1. Get and validate the comment data
-2. Verify the user owns the task
+2. Verify the user owns the task or is a board member
 3. Create the comment
 4. Send the details of the created comment to user
 */
@@ -15,6 +15,7 @@ import {
 import List from "../../models/list.model.js";
 import Comment from "../../models/comment.model.js";
 import { ZodError } from "zod";
+import BoardMember from "../../models/boardMember.model.js";
 
 const CreateCommentService = async (
   userId: string,
@@ -26,7 +27,7 @@ const CreateCommentService = async (
     const validatedInput = CreateCommentInputSchema.parse(commentData);
     const content = validatedInput.content;
 
-    // 2. Verify the user owns the task
+    // 2. Verify the user owns the task or is a board member
     const task = taskId.trim();
     if (!Types.ObjectId.isValid(task)) {
       return {
@@ -35,11 +36,16 @@ const CreateCommentService = async (
       };
     }
 
-    const userOwnsList = await List.findOne({
-      tasks: task,
-      userId,
-    }).exec();
-    if (!userOwnsList) {
+    const [userOwnsList, userIsBoardMember] = await Promise.all([
+      List.findOne({
+        tasks: task,
+        userId,
+      })
+        .lean()
+        .exec(),
+      BoardMember.findOne({ user_id: userId }).lean().exec(),
+    ]);
+    if (!userOwnsList && !userIsBoardMember) {
       return {
         success: false,
         message: "Task not found",
