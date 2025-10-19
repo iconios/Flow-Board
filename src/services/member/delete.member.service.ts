@@ -1,27 +1,40 @@
 /*
 #Plan:
-1. Get the owner id and validate the boardId
+1. Get the owner id and member id and validate them
 2. Verify that the owner owns the board
-3. Delete the member
-4. Send op status to client
+3. Get the board title, board owner name, member name, member email
+4. Remove the member from the board
+5. Send a membership revocation email to member
+6. Send op status to client
 */
 
 import Board from "../../models/board.model.js";
 import BoardMember from "../../models/boardMember.model.js";
 import { MongooseError, Types } from "mongoose";
+import { sendMembershipRemovalEmail } from "../../utils/mailer.util.js";
+import type {
+  PopulatedBoardUserIdType,
+  PopulatedMemberUserIdType,
+} from "../../types/member.type.js";
 
 const DeleteMemberService = async (ownerId: string, memberId: string) => {
   try {
     // 1. Get the owner id and validate the boardId
-    if (!Types.ObjectId.isValid(memberId.trim())) {
+    if (
+      !Types.ObjectId.isValid(memberId.trim()) ||
+      !Types.ObjectId.isValid(ownerId.trim())
+    ) {
       return {
         success: false,
-        message: "Invalid board member",
+        message: "Invalid board member or owner ID",
       };
     }
 
     // 2. Verify that the owner owns the board
-    const member = await BoardMember.findById(memberId).exec();
+    const member = await BoardMember.findById(memberId)
+      .populate<{ user_id: PopulatedMemberUserIdType }>("user_id")
+      .lean()
+      .exec();
     if (!member) {
       return {
         success: false,
@@ -29,7 +42,11 @@ const DeleteMemberService = async (ownerId: string, memberId: string) => {
       };
     }
     console.log("Member details", member);
-    const board = await Board.findById(member.board_id).exec();
+
+    const board = await Board.findById(member.board_id)
+      .populate<{ user_id: PopulatedBoardUserIdType }>("user_id")
+      .lean()
+      .exec();
     if (!board) {
       return {
         success: false,
@@ -37,14 +54,20 @@ const DeleteMemberService = async (ownerId: string, memberId: string) => {
       };
     }
 
-    if (board.user_id.toString() !== ownerId) {
+    if (board.user_id._id.toString() !== ownerId) {
       return {
         success: false,
         message: "Unauthorized: Only board owners can remove members",
       };
     }
 
-    // 3. Delete the member
+    // 3. Get the board title, board owner name, member name, member email
+    const boardTitle = board.title;
+    const ownerName = board.user_id.firstname;
+    const memberName = member.user_id.firstname;
+    const memberEmail = member.user_id.email;
+
+    // 4. Remove the member from the board
     const deletedMember = await BoardMember.deleteOne({ _id: memberId }).exec();
     if (deletedMember.deletedCount === 0) {
       return {
@@ -53,7 +76,16 @@ const DeleteMemberService = async (ownerId: string, memberId: string) => {
       };
     }
 
-    // 4. Send op status to client
+    // 5. Send a membership revocation email to member
+    sendMembershipRemovalEmail(memberEmail, ownerName, memberName, boardTitle);
+    console.log("Member removed from board", {
+      boardTitle,
+      ownerName,
+      memberName,
+      memberEmail,
+    });
+
+    // 6. Send op status to client
     return {
       success: true,
       message: "Board member successfully deleted",

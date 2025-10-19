@@ -96,3 +96,22 @@ const BoardMemberReadOutputSchema = z.object({
 export type BoardMemberReadOutputType = z.infer<
   typeof BoardMemberReadOutputSchema
 >;
+
+const PopulatedMemberUserIdSchema = z.object({
+  _id: z.string(),
+  firstname: z.string(),
+  email: z.string(),
+});
+
+export type PopulatedMemberUserIdType = z.infer<
+  typeof PopulatedMemberUserIdSchema
+>;
+
+const PopulatedBoardUserIdSchema = z.object({
+  _id: z.string(),
+  firstname: z.string(),
+});
+
+export type PopulatedBoardUserIdType = z.infer<
+  typeof PopulatedBoardUserIdSchema
+>;
