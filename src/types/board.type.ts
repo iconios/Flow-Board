@@ -22,13 +22,16 @@ export const UpdateBoardInputSchema = z
 export type UpdateBoardInputType = z.infer<typeof UpdateBoardInputSchema>;
 
 const BoardDetailsSchema = z.object({
-  _id: z.string().optional(),
+  _id: z.string(),
   title: z.string(),
   bg_color: z.string(),
-  user_id: z.string(),
+  user: z.object({
+    _id: z.string(),
+    firstname: z.string(),
+    email: z.string(),
+  }),
   created_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),
-  lists: z.array(z.string()),
 });
 
 export type BoardDetailsType = z.infer<typeof BoardDetailsSchema>;

@@ -1,16 +1,17 @@
 /*
-#Plan: Get All the Members of a owner's Board
-1. Receive and validate the owner, user or board
-2. Retrieve the Members associated with a Board 
-3. Send the details to the client
+#Plan: Get All the Members of a Board
+1. Receive and validate the user and the board
+2. Ensure the user owns the board or is a board member
+3. Retrieve the Members associated with the Board 
+4. Send the details to the client
 */
 
 import { Types } from "mongoose";
 import BoardMember from "../../models/boardMember.model.js";
 import {
   ReadMemberInputSchema,
-  type BoardMemberReadOutputType,
   type MemberReadOutputType,
+  type PopulatedMemberUserIdType,
   type ReadMemberInputType,
 } from "../../types/member.type.js";
 import Board from "../../models/board.model.js";
@@ -19,8 +20,8 @@ const ReadMemberService = async (
   readMemberInput: ReadMemberInputType,
 ): Promise<MemberReadOutputType> => {
   try {
-    // 1. Receive and validate the owner, user or board
-    const { boardId, ownerId } = ReadMemberInputSchema.parse(readMemberInput);
+    // 1. Receive and validate the user and the board
+    const { boardId, userId } = ReadMemberInputSchema.parse(readMemberInput);
 
     if (!Types.ObjectId.isValid(boardId)) {
       return {
@@ -30,7 +31,7 @@ const ReadMemberService = async (
       };
     }
 
-    if (!Types.ObjectId.isValid(ownerId)) {
+    if (!Types.ObjectId.isValid(userId)) {
       return {
         success: false,
         message: "Invalid board owner ID",
@@ -38,8 +39,11 @@ const ReadMemberService = async (
       };
     }
 
-    // 2. Retrieve the Members associated with a Board
-    const board = await Board.findById(boardId).exec();
+    // 2. Ensure the user owns the board or is a board member
+    const [board, member] = await Promise.all([
+      Board.findById(boardId).select("user_id").lean().exec(),
+      BoardMember.findOne({ user_id: userId, board_id: boardId }).lean().exec()
+    ]) 
     if (!board) {
       return {
         success: false,
@@ -48,8 +52,7 @@ const ReadMemberService = async (
       };
     }
 
-    // Ensure the owner owns the board indeed
-    if (board.user_id.toString() !== ownerId) {
+    if (board.user_id.toString() !== userId && !member) {
       return {
         success: false,
         message: "Unauthorized access",
@@ -57,14 +60,14 @@ const ReadMemberService = async (
       };
     }
 
-    // Fetch the verified members associated with a board
-    const membersFound = (await BoardMember.find({
+    // 3. Retrieve the Members associated with the Board 
+    const membersFound = await BoardMember.find({
       board_id: boardId,
       isVerified: true,
     })
-      .populate("user_id")
+      .populate<{ user_id: PopulatedMemberUserIdType }>("user_id")
       .lean()
-      .exec()) as unknown as BoardMemberReadOutputType[];
+      .exec();
 
     if (membersFound.length === 0) {
       return {
@@ -84,6 +87,7 @@ const ReadMemberService = async (
         email: member.user_id.email,
       },
       role: member.role,
+      boardOwnerUserId: board.user_id.toString(),
     }));
 
     return {

@@ -1,7 +1,7 @@
 /*
 #Plan:
 1. Get and validate the user id
-2. 2. Get the boards of the user, all the IDs and the boards the user is a member of
+2. Get the boards of the user, all the IDs and the boards the user is a member of
 3. Send all the boards data to the user
 */
 
@@ -12,6 +12,7 @@ import type {
   BoardReadOutputType,
 } from "../../types/board.type.js";
 import BoardMember from "../../models/boardMember.model.js";
+import type { PopulatedMemberUserIdType } from "../../types/member.type.js";
 
 const ReadBoardService = async (
   user_id: string,
@@ -28,21 +29,35 @@ const ReadBoardService = async (
 
     // 2. Get the boards of the user, all the IDs and the boards the user is a member of
     const boardIDsUserIsMember = await BoardMember.find({ user_id })
-      .select("board_id")
+      .select("board_id").lean()
       .exec();
     const boardIds = boardIDsUserIsMember.map((board) => board.board_id);
 
     const userBoardOrIsMember = await Board.find<BoardDetailsType>({
       $or: [{ _id: { $in: boardIds } }, { user_id: id }],
     })
-      .populate("user_id")
-      .exec();
+      .populate<{ user_id: PopulatedMemberUserIdType }>("user_id").exec();
+
+    
+    const boardsToReturn = userBoardOrIsMember.map((board) => ({
+      _id: board._id.toString(),
+      title: board.title,
+      bg_color: board.bg_color,
+      user: {
+        _id: board.user_id._id.toString(),
+        email: board.user_id.email,
+        firstname: board.user_id.firstname
+      },
+      created_at: board.created_at.toString(),
+      updated_at: board.updated_at.toString(),
+    }))
 
     // 3. Send all the boards data to the user
+    console.log("Response to client", boardsToReturn)
     return {
       success: true,
       message: "Boards retrieved",
-      boards: userBoardOrIsMember,
+      boards: boardsToReturn,
     };
   } catch (error) {
     console.error(`Error retrieving boards for ${user_id}`, error);

@@ -59,7 +59,7 @@ BoardMemberRouter.get(
         });
       }
       const readMemberInput = {
-        ownerId: req.userId!,
+        userId: req.userId!,
         boardId: req.params.boardId!,
       };
       const result = await ReadMemberService(readMemberInput);

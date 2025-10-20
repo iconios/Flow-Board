@@ -124,7 +124,7 @@ const CreateMemberService = async (
 
     // Delete unverified member
     if (memberExists && !memberExists.isVerified) {
-      await BoardMember.findByIdAndDelete(memberExists._id).exec();
+      await BoardMember.deleteOne({ _id: memberExists._id }).exec();
     }
 
     // 7. Create the member

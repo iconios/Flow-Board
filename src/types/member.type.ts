@@ -40,12 +40,13 @@ const MemberReadOutputSchema = z.object({
       z.object({
         memberId: z.string(),
         boardId: z.string(),
-        user: {
+        user: z.object({
           userId: z.string(),
           firstname: z.string(),
           email: z.string(),
-        },
+        }),
         role: z.string(),
+        boardOwnerUserId: z.string()
       }),
     )
     .optional(),
@@ -54,7 +55,7 @@ const MemberReadOutputSchema = z.object({
 export type MemberReadOutputType = z.infer<typeof MemberReadOutputSchema>;
 
 export const ReadMemberInputSchema = z.object({
-  ownerId: z.string().trim(),
+  userId: z.string().trim(),
   boardId: z.string().trim(),
 });
 

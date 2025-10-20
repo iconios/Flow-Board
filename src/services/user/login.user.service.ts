@@ -26,7 +26,6 @@ const UserLoginService = async (
   userLoginInput: UserLoginInputType,
 ): Promise<UserLoginMessageType> => {
   // Declare the variables
-  const JWT_SECRET = process.env.JWT_SECRET;
 
   try {
     // Validate the user input
@@ -91,6 +90,7 @@ const UserLoginService = async (
       message: "Login successful",
       token,
       user: {
+        id: userExist._id.toString(),
         email: userExist.email,
         firstname: userExist.firstname,
       },

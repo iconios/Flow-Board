@@ -83,6 +83,7 @@ const UserCreateMessageSchema = z.object({
 export type UserCreateMessageType = z.infer<typeof UserCreateMessageSchema>;
 
 const TokenSchema = z.object({
+  id: z.string(),
   email: z.email(),
   firstname: z.string(),
 });
