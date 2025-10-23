@@ -5,6 +5,8 @@
 */
 import express, { type Request, type Response } from "express";
 import VerifyEmailAuth from "../services/auth/verify.email.auth.js";
+import * as dotenv from 'dotenv';
+dotenv.config();
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import CreateUserService from "../services/user/create.user.service.js";
