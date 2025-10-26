@@ -16,6 +16,9 @@ import CommentRouter from "./controllers/comment.controller.js";
 import SocketTokenExtraction from "./middlewares/socket.token.extraction.util.js";
 import JoinRoomUtility from "./utils/join.room.util.js";
 import LeaveRoomUtility from "./utils/leave.room.util.js";
+import ListReorderUtility from "./utils/list.reorder.util.js";
+import TaskReorderUtility from "./utils/task.reorder.util.js";
+import TaskMoveUtility from "./task.move.utility.js";
 dotenv.config();
 
 // Initialize all variables or constants
@@ -82,10 +85,21 @@ io.on("connection", (socket) => {
   console.log(`User ${socket.id} connected`);
 
   // Socket join room
-  socket.on("room:join", JoinRoomUtility);
+  socket.on("room:join", (roomId: string) => JoinRoomUtility(socket, roomId));
 
   // Socket leave room
-  socket.on("room:leave", LeaveRoomUtility);
+  socket.on("room:leave", (roomId: string) => LeaveRoomUtility(socket, roomId));
+
+  // Socket reorder list
+  socket.on("list:reorder", (payload) =>
+    ListReorderUtility(socket, payload),
+  );
+
+  // Socket reorder task
+  socket.on("task:reorder", (payload) => TaskReorderUtility(socket, payload));
+
+  // Socket move task
+  socket.on("task:move", (payload) => TaskMoveUtility(socket, payload));
 
   socket.on("disconnect", () => {
     console.log("User disconnected");

@@ -51,38 +51,38 @@ const JoinRoomUtility = async (
       socket.emit("room:join:error", { message: "Board not found" });
       return;
     }
-    const userIsBoardMember = await BoardMember.findOne({
-      user_id: userId,
-      board_id: boardId,
-    }).exec();
+    // const userIsBoardMember = await BoardMember.findOne({
+    //   user_id: userId,
+    //   board_id: boardId,
+    // }).exec();
 
-    if (!userIsBoardMember) {
-      socket.emit("room:join:error", {
-        message: "Only board members are allowed",
-      });
-      return;
-    }
+    // if (!userIsBoardMember) {
+    //   socket.emit("room:join:error", {
+    //     message: "Only board members are allowed",
+    //   });
+    //   return;
+    // }
 
-    //   3. Verify that the user is not the board owner
-    const userOwnsBoard = await Board.findOne({
-      _id: boardId,
-      user_id: userId,
-    })
-      .lean()
-      .exec();
+    // //   3. Verify that the user is not the board owner
+    // const userOwnsBoard = await Board.findOne({
+    //   _id: boardId,
+    //   user_id: userId,
+    // })
+    //   .lean()
+    //   .exec();
 
-    if (userOwnsBoard) {
-      socket.emit("room:join:error", { message: "Board owner cannot join" });
-      return;
-    }
+    // if (userOwnsBoard) {
+    //   socket.emit("room:join:error", { message: "Board owner cannot join" });
+    //   return;
+    // }
 
     //  4. Add the user to the room
     socket.join(roomId);
+    console.log(`User ${userId} joined the room ${roomId}`);
     socket.emit("room:join:success", {
       message: "Joining room successful",
       roomId,
     });
-    console.log(`User ${userId} joined room ${roomId}`);
   } catch (error) {
     console.error(`Error joining user to room ${roomId}`, error);
 

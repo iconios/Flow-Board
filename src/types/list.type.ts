@@ -107,3 +107,14 @@ const DeleteListOutputSchema = z.object({
 });
 
 export type DeleteListOutputType = z.infer<typeof DeleteListOutputSchema>;
+
+export const ListReorderInputSchema = z
+  .object({
+    data: z.object({
+      listId: z.string(),
+      position: z.number(),
+    })
+  })
+  .strict();
+
+export type ListReorderInputType = z.infer<typeof ListReorderInputSchema>;

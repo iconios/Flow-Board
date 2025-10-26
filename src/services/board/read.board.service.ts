@@ -29,16 +29,17 @@ const ReadBoardService = async (
 
     // 2. Get the boards of the user, all the IDs and the boards the user is a member of
     const boardIDsUserIsMember = await BoardMember.find({ user_id })
-      .select("board_id").lean()
+      .select("board_id")
+      .lean()
       .exec();
     const boardIds = boardIDsUserIsMember.map((board) => board.board_id);
 
     const userBoardOrIsMember = await Board.find<BoardDetailsType>({
       $or: [{ _id: { $in: boardIds } }, { user_id: id }],
     })
-      .populate<{ user_id: PopulatedMemberUserIdType }>("user_id").exec();
+      .populate<{ user_id: PopulatedMemberUserIdType }>("user_id")
+      .exec();
 
-    
     const boardsToReturn = userBoardOrIsMember.map((board) => ({
       _id: board._id.toString(),
       title: board.title,
@@ -46,14 +47,14 @@ const ReadBoardService = async (
       user: {
         _id: board.user_id._id.toString(),
         email: board.user_id.email,
-        firstname: board.user_id.firstname
+        firstname: board.user_id.firstname,
       },
       created_at: board.created_at.toString(),
       updated_at: board.updated_at.toString(),
-    }))
+    }));
 
     // 3. Send all the boards data to the user
-    console.log("Response to client", boardsToReturn)
+    console.log("Response to client", boardsToReturn);
     return {
       success: true,
       message: "Boards retrieved",

@@ -33,18 +33,21 @@ const UpdateCommentService = async (
     const validatedInput = UpdateCommentInputSchema.parse(updateData);
 
     // 2. Verify that the user owns the comment
-    const commentToUpdate = await Comment.findById(comment).select("userId").lean().exec();
+    const commentToUpdate = await Comment.findById(comment)
+      .select("userId")
+      .lean()
+      .exec();
     if (!commentToUpdate) {
       return {
         success: false,
-        message: "Comment not found"
-      }
+        message: "Comment not found",
+      };
     }
     if (commentToUpdate.userId.toString() !== userId) {
       return {
         success: false,
-        message: "Only comment creator can update comment"
-      }
+        message: "Only comment creator can update comment",
+      };
     }
 
     // 3. Update the comment

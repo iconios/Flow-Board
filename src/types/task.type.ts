@@ -99,12 +99,21 @@ export const TaskSchema = z.object({
 
 export type TaskType = z.infer<typeof TaskSchema>;
 
-export const MoveTaskServiceInputSchema = z.object({
-  taskId: z.string(), 
-  newListId: z.string(), 
-  oldListId: z.string(), 
-  newPosition: z.number(), 
-  oldPosition: z.number()
-});
+export const TaskReorderInputSchema = z.object({
+  data: z.object({
+    taskId: z.string(),
+    listId: z.string(),
+    position: z.number(),
+  })
+}).strict();
 
-export type MoveTaskServiceInputType = z.infer<typeof MoveTaskServiceInputSchema>;
+export type TaskReorderInputType = z.infer<typeof TaskReorderInputSchema>;
+
+export const TaskMoveInputSchema =z.object({
+  data: z.object({
+    taskId: z.string(),
+    listId: z.string(),
+  })
+}).strict();
+
+export type TaskMoveInputType = z.infer<typeof TaskMoveInputSchema>;

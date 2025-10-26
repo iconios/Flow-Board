@@ -42,8 +42,8 @@ const ReadMemberService = async (
     // 2. Ensure the user owns the board or is a board member
     const [board, member] = await Promise.all([
       Board.findById(boardId).select("user_id").lean().exec(),
-      BoardMember.findOne({ user_id: userId, board_id: boardId }).lean().exec()
-    ]) 
+      BoardMember.findOne({ user_id: userId, board_id: boardId }).lean().exec(),
+    ]);
     if (!board) {
       return {
         success: false,
@@ -60,7 +60,7 @@ const ReadMemberService = async (
       };
     }
 
-    // 3. Retrieve the Members associated with the Board 
+    // 3. Retrieve the Members associated with the Board
     const membersFound = await BoardMember.find({
       board_id: boardId,
       isVerified: true,

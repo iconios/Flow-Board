@@ -46,7 +46,7 @@ const MemberReadOutputSchema = z.object({
           email: z.string(),
         }),
         role: z.string(),
-        boardOwnerUserId: z.string()
+        boardOwnerUserId: z.string(),
       }),
     )
     .optional(),
