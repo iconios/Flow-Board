@@ -1,1 +1,1 @@
-{"version":3,"file":"boardMember.model.d.ts","sourceRoot":"","sources":["../../src/models/boardMember.model.ts"],"names":[],"mappings":"AAAA,OAAO,QAAQ,MAAM,UAAU,CAAC;AAuBhC,QAAA,MAAM,YAAY;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;GAAoD,CAAC;AAEvE,eAAe,YAAY,CAAC"}
+{"version":3,"file":"boardMember.model.d.ts","sourceRoot":"","sources":["../../src/models/boardMember.model.ts"],"names":[],"mappings":"AAAA,OAAO,QAAQ,MAAM,UAAU,CAAC;AAsDhC,QAAA,MAAM,WAAW;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;OAGhB,CAAC;AAEF,eAAe,WAAW,CAAC"}

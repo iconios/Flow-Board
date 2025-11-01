@@ -1,48 +1,27 @@
 import mongoose from "mongoose";
 const TaskSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-  },
-  description: String,
-  due_date: Date,
-  priority: {
-    type: String,
-    enum: ["low", "medium", "high", "critical"],
-    default: "low",
-  },
-  position: Number,
-  comments: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Comment",
+    title: {
+        type: String,
+        required: true,
     },
-  ],
-  activity_logs: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Activity",
+    description: String,
+    dueDate: Date,
+    priority: {
+        type: String,
+        enum: ["low", "medium", "high", "critical"],
+        default: "low",
     },
-  ],
-  list_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "List",
-  },
-  collaborators: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+    position: Number,
+    listId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "List",
+        index: true,
     },
-  ],
-  created_at: {
-    type: Date,
-    default: Date.now,
-    immutable: true,
-  },
-  updated_at: {
-    type: Date,
-    default: Date.now,
-  },
+}, {
+    timestamps: {
+        createdAt: "createdAt",
+        updatedAt: "updatedAt",
+    },
 });
 const Task = mongoose.model("Task", TaskSchema);
 export default Task;

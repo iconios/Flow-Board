@@ -1,106 +1,55 @@
 import mongoose from "mongoose";
-declare const Task: mongoose.Model<
-  {
-    created_at: Date;
-    updated_at: Date;
+declare const Task: mongoose.Model<{
     priority: "high" | "low" | "medium" | "critical";
     title: string;
-    comments: mongoose.Types.ObjectId[];
-    activity_logs: mongoose.Types.ObjectId[];
-    collaborators: mongoose.Types.ObjectId[];
-    description?: string;
+    listId?: mongoose.Types.ObjectId;
     position?: number;
-    due_date?: Date;
-    list_id?: mongoose.Types.ObjectId;
-  },
-  {},
-  {},
-  {},
-  mongoose.Document<
-    unknown,
-    {},
-    {
-      created_at: Date;
-      updated_at: Date;
-      priority: "high" | "low" | "medium" | "critical";
-      title: string;
-      comments: mongoose.Types.ObjectId[];
-      activity_logs: mongoose.Types.ObjectId[];
-      collaborators: mongoose.Types.ObjectId[];
-      description?: string;
-      position?: number;
-      due_date?: Date;
-      list_id?: mongoose.Types.ObjectId;
-    }
-  > & {
-    created_at: Date;
-    updated_at: Date;
+    description?: string;
+    dueDate?: Date;
+}, {}, {}, {}, mongoose.Document<unknown, {}, {
     priority: "high" | "low" | "medium" | "critical";
     title: string;
-    comments: mongoose.Types.ObjectId[];
-    activity_logs: mongoose.Types.ObjectId[];
-    collaborators: mongoose.Types.ObjectId[];
-    description?: string;
+    listId?: mongoose.Types.ObjectId;
     position?: number;
-    due_date?: Date;
-    list_id?: mongoose.Types.ObjectId;
-  } & {
+    description?: string;
+    dueDate?: Date;
+}> & {
+    priority: "high" | "low" | "medium" | "critical";
+    title: string;
+    listId?: mongoose.Types.ObjectId;
+    position?: number;
+    description?: string;
+    dueDate?: Date;
+} & {
     _id: mongoose.Types.ObjectId;
-  },
-  mongoose.Schema<
-    any,
-    mongoose.Model<any, any, any, any, any, any>,
-    {},
-    {},
-    {},
-    {},
-    mongoose.DefaultSchemaOptions,
-    {
-      created_at: Date;
-      updated_at: Date;
-      priority: "high" | "low" | "medium" | "critical";
-      title: string;
-      comments: mongoose.Types.ObjectId[];
-      activity_logs: mongoose.Types.ObjectId[];
-      collaborators: mongoose.Types.ObjectId[];
-      description?: string;
-      position?: number;
-      due_date?: Date;
-      list_id?: mongoose.Types.ObjectId;
-    },
-    mongoose.Document<
-      unknown,
-      {},
-      mongoose.FlatRecord<{
-        created_at: Date;
-        updated_at: Date;
-        priority: "high" | "low" | "medium" | "critical";
-        title: string;
-        comments: mongoose.Types.ObjectId[];
-        activity_logs: mongoose.Types.ObjectId[];
-        collaborators: mongoose.Types.ObjectId[];
-        description?: string;
-        position?: number;
-        due_date?: Date;
-        list_id?: mongoose.Types.ObjectId;
-      }>
-    > &
-      mongoose.FlatRecord<{
-        created_at: Date;
-        updated_at: Date;
-        priority: "high" | "low" | "medium" | "critical";
-        title: string;
-        comments: mongoose.Types.ObjectId[];
-        activity_logs: mongoose.Types.ObjectId[];
-        collaborators: mongoose.Types.ObjectId[];
-        description?: string;
-        position?: number;
-        due_date?: Date;
-        list_id?: mongoose.Types.ObjectId;
-      }> & {
-        _id: mongoose.Types.ObjectId;
-      }
-  >
->;
+}, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, {
+    timestamps: {
+        createdAt: string;
+        updatedAt: string;
+    };
+}, {
+    priority: "high" | "low" | "medium" | "critical";
+    title: string;
+    listId?: mongoose.Types.ObjectId;
+    position?: number;
+    description?: string;
+    dueDate?: Date;
+}, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
+    priority: "high" | "low" | "medium" | "critical";
+    title: string;
+    listId?: mongoose.Types.ObjectId;
+    position?: number;
+    description?: string;
+    dueDate?: Date;
+}>> & mongoose.FlatRecord<{
+    priority: "high" | "low" | "medium" | "critical";
+    title: string;
+    listId?: mongoose.Types.ObjectId;
+    position?: number;
+    description?: string;
+    dueDate?: Date;
+}> & {
+    _id: mongoose.Types.ObjectId;
+}>>;
 export default Task;
 //# sourceMappingURL=task.model.d.ts.map

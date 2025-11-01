@@ -1,64 +1,36 @@
 import mongoose from "mongoose";
-declare const Board_Member: mongoose.Model<
-  {
-    created_at: Date;
-    role: "admin" | "member";
-    user_id?: mongoose.Types.ObjectId;
-    board_id?: mongoose.Types.ObjectId;
-  },
-  {},
-  {},
-  {},
-  mongoose.Document<
-    unknown,
-    {},
-    {
-      created_at: Date;
-      role: "admin" | "member";
-      user_id?: mongoose.Types.ObjectId;
-      board_id?: mongoose.Types.ObjectId;
-    }
-  > & {
-    created_at: Date;
-    role: "admin" | "member";
-    user_id?: mongoose.Types.ObjectId;
-    board_id?: mongoose.Types.ObjectId;
-  } & {
+declare const BoardMember: mongoose.Model<{
+    board_id: string;
+    user_id: string;
+    role: string;
+    created_at: string;
+    updated_at: string;
+    isVerified: boolean;
+    verificationToken: string;
+    verificationTokenExpires: string;
+    generateVerificationToken: import("zod/v4/core").$InferOuterFunctionType<import("zod/v4/core").$ZodFunctionArgs, import("zod/v4/core").$ZodFunctionOut>;
+}, {}, {}, {}, mongoose.Document<unknown, {}, {
+    board_id: string;
+    user_id: string;
+    role: string;
+    created_at: string;
+    updated_at: string;
+    isVerified: boolean;
+    verificationToken: string;
+    verificationTokenExpires: string;
+    generateVerificationToken: import("zod/v4/core").$InferOuterFunctionType<import("zod/v4/core").$ZodFunctionArgs, import("zod/v4/core").$ZodFunctionOut>;
+}> & {
+    board_id: string;
+    user_id: string;
+    role: string;
+    created_at: string;
+    updated_at: string;
+    isVerified: boolean;
+    verificationToken: string;
+    verificationTokenExpires: string;
+    generateVerificationToken: import("zod/v4/core").$InferOuterFunctionType<import("zod/v4/core").$ZodFunctionArgs, import("zod/v4/core").$ZodFunctionOut>;
+} & {
     _id: mongoose.Types.ObjectId;
-  },
-  mongoose.Schema<
-    any,
-    mongoose.Model<any, any, any, any, any, any>,
-    {},
-    {},
-    {},
-    {},
-    mongoose.DefaultSchemaOptions,
-    {
-      created_at: Date;
-      role: "admin" | "member";
-      user_id?: mongoose.Types.ObjectId;
-      board_id?: mongoose.Types.ObjectId;
-    },
-    mongoose.Document<
-      unknown,
-      {},
-      mongoose.FlatRecord<{
-        created_at: Date;
-        role: "admin" | "member";
-        user_id?: mongoose.Types.ObjectId;
-        board_id?: mongoose.Types.ObjectId;
-      }>
-    > &
-      mongoose.FlatRecord<{
-        created_at: Date;
-        role: "admin" | "member";
-        user_id?: mongoose.Types.ObjectId;
-        board_id?: mongoose.Types.ObjectId;
-      }> & {
-        _id: mongoose.Types.ObjectId;
-      }
-  >
->;
-export default Board_Member;
+}, any>;
+export default BoardMember;
 //# sourceMappingURL=boardMember.model.d.ts.map

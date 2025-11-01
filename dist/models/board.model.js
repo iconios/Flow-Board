@@ -1,23 +1,33 @@
 import mongoose from "mongoose";
 const BoardSchema = new mongoose.Schema({
-  title: String,
-  bg_color: String,
-  user_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-  },
-  created_at: {
-    type: Date,
-    default: Date.now(),
-    immutable: true,
-  },
-  lists: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "List",
+    title: {
+        type: String,
+        required: true,
+        max: 25,
     },
-  ],
-  updated_at: Date,
+    bg_color: {
+        type: String,
+        default: "#ffffff",
+        required: true,
+    },
+    user_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+        index: true,
+    },
+    lists: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "List",
+            required: false,
+        },
+    ],
+}, {
+    timestamps: {
+        createdAt: "created_at",
+        updatedAt: "updated_at",
+    },
 });
 const Board = mongoose.model("Board", BoardSchema);
 export default Board;
