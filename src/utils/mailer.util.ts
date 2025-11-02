@@ -7,7 +7,7 @@ const environment = process.env.NODE_ENV;
 const transporter = nodemailer.createTransport({
   host: process.env.MAIL_HOST,
   port: Number(process.env.MAIL_PORT),
-  secure: true,
+  secure: environment === "development",
   auth: {
     user: process.env.MAIL_USER,
     pass: process.env.MAIL_PASSWORD,
@@ -18,7 +18,7 @@ const transporter = nodemailer.createTransport({
   tls: {
     servername: "smtp.mail.yahoo.com",
     minVersion: "TLSv1.2",
-    rejectUnauthorized: true,
+    rejectUnauthorized: environment === "development",
   },
 });
 

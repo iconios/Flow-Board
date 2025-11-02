@@ -37,7 +37,7 @@ const UpdateBoardService = async (board_id, boardDetailsInput) => {
                 message: "Board does not exist",
             };
         }
-        if (board.user_id.toString() !== userId) {
+        if (board.user._id.toString() !== userId) {
             return {
                 success: false,
                 message: "Unauthorized user",
