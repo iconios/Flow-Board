@@ -17,12 +17,12 @@ const CommentSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now(),
+    default: Date.now,
     immutable: true,
   },
   updatedAt: {
     type: Date,
-    default: Date.now(),
+    default: Date.now,
   },
 });
 
