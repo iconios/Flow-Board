@@ -1,4 +1,4 @@
-import express, {} from "express";
+import express from "express";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
 import * as dotenv from "dotenv";
@@ -25,31 +25,35 @@ const app = express();
 const server = createServer(app);
 const PORT = process.env.PORT;
 const io = new Server(server, {
-    path: "/socket.io",
-    cors: {
-        origin: ["http://localhost:3000"],
-        credentials: true,
-    },
+  path: "/socket.io",
+  cors: {
+    origin: ["http://localhost:3000"],
+    credentials: true,
+  },
 });
 // Enable express middleware
-app.use(cors({
+app.use(
+  cors({
     origin: [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "https://localhost:3000",
+      "http://localhost:3000",
+      "http://127.0.0.1:3000",
+      "https://localhost:3000",
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-}));
-app.use(helmet({
+  }),
+);
+app.use(
+  helmet({
     contentSecurityPolicy: false,
     crossOriginResourcePolicy: { policy: "cross-origin" },
     crossOriginEmbedderPolicy: false,
-}));
+  }),
+);
 // (Prod only) HSTS once you have HTTPS everywhere
 if (process.env.NODE_ENV === "production") {
-    app.use(helmet.hsts({ maxAge: 15552000 }));
+  app.use(helmet.hsts({ maxAge: 15552000 }));
 }
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -67,39 +71,39 @@ app.use("/activity", ActivityRouter);
 app.use("/comment", CommentRouter);
 // Handle 404 errors
 app.all(/(.*)/, (req, res) => {
-    return res.status(404).json({ error: "Route not found" });
+  return res.status(404).json({ error: "Route not found" });
 });
 // Initialize the socket.io connections
 io.use(SocketTokenExtraction);
 io.on("connection", (socket) => {
-    console.log(`User ${socket.id} connected`);
-    // Socket join room
-    socket.on("room:join", (roomId) => JoinRoomUtility(socket, roomId));
-    // Socket leave room
-    socket.on("room:leave", (roomId) => LeaveRoomUtility(socket, roomId));
-    // Socket reorder list
-    socket.on("list:reorder", (payload) => ListReorderUtility(socket, payload));
-    // Socket reorder task
-    socket.on("task:reorder", (payload) => TaskReorderUtility(socket, payload));
-    // Socket move task
-    socket.on("task:move", (payload) => TaskMoveUtility(socket, payload));
-    socket.on("disconnect", () => {
-        console.log("User disconnected");
-    });
+  console.log(`User ${socket.id} connected`);
+  // Socket join room
+  socket.on("room:join", (roomId) => JoinRoomUtility(socket, roomId));
+  // Socket leave room
+  socket.on("room:leave", (roomId) => LeaveRoomUtility(socket, roomId));
+  // Socket reorder list
+  socket.on("list:reorder", (payload) => ListReorderUtility(socket, payload));
+  // Socket reorder task
+  socket.on("task:reorder", (payload) => TaskReorderUtility(socket, payload));
+  // Socket move task
+  socket.on("task:move", (payload) => TaskMoveUtility(socket, payload));
+  socket.on("disconnect", () => {
+    console.log("User disconnected");
+  });
 });
 io.engine.on("connection_error", (error) => {
-    // Fires when the handshake fails before a socket is created
-    console.error("Engine connection_error:", {
-        code: error.code,
-        message: error.message,
-        context: error.context,
-    });
+  // Fires when the handshake fails before a socket is created
+  console.error("Engine connection_error:", {
+    code: error.code,
+    message: error.message,
+    context: error.context,
+  });
 });
 io.engine.on("initial_headers", (headers, req) => {
-    console.log("WS/Poll init:", req.urlencoded);
+  console.log("WS/Poll init:", req.urlencoded);
 });
 // Initialize the http server to start listening for requests
 server.listen(PORT, () => {
-    console.log("Server running on Port", PORT);
+  console.log("Server running on Port", PORT);
 });
 //# sourceMappingURL=index.js.map

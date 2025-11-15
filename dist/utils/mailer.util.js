@@ -4,38 +4,43 @@ dotenv.config();
 const environment = process.env.NODE_ENV;
 // Create transporter
 const transporter = nodemailer.createTransport({
-    host: process.env.MAIL_HOST,
-    port: Number(process.env.MAIL_PORT),
-    secure: environment === "development",
-    auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASSWORD,
-    },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 20000,
-    tls: {
-        servername: "smtp.mail.yahoo.com",
-        minVersion: "TLSv1.2",
-        rejectUnauthorized: environment === "development",
-    },
+  host: process.env.MAIL_HOST,
+  port: Number(process.env.MAIL_PORT),
+  secure: environment === "development",
+  auth: {
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASSWORD,
+  },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 20000,
+  tls: {
+    servername: "smtp.mail.yahoo.com",
+    minVersion: "TLSv1.2",
+    rejectUnauthorized: environment === "development",
+  },
 });
 // Verify transporter
 transporter.verify((error, success) => {
-    if (error) {
-        console.log("Error with email configuration", error);
-    }
-    if (success) {
-        console.log("Server is ready to send emails");
-    }
+  if (error) {
+    console.log("Error with email configuration", error);
+  }
+  if (success) {
+    console.log("Server is ready to send emails");
+  }
 });
 // Send Board Membership Removal Email Function
-const sendMembershipRemovalEmail = (boardMemberEmail, boardOwnerName, boardMemberName, boardTitle) => {
-    const mailOptions = {
-        from: process.env.MAIL_USER,
-        to: boardMemberEmail,
-        subject: "Board Membership Update",
-        html: `<!DOCTYPE html>
+const sendMembershipRemovalEmail = (
+  boardMemberEmail,
+  boardOwnerName,
+  boardMemberName,
+  boardTitle,
+) => {
+  const mailOptions = {
+    from: process.env.MAIL_USER,
+    to: boardMemberEmail,
+    subject: "Board Membership Update",
+    html: `<!DOCTYPE html>
             <html lang="en">
             <head>
                 <meta charset="UTF-8">
@@ -85,24 +90,23 @@ const sendMembershipRemovalEmail = (boardMemberEmail, boardOwnerName, boardMembe
                 </table>
             </body>
             </html>`,
-    };
-    // Send board membership revocation email
-    try {
-        transporter.sendMail(mailOptions);
-        console.log("Board membership revocation email sent to", boardMemberEmail);
-    }
-    catch (error) {
-        console.log("Error sending board membership invitation email", error);
-    }
+  };
+  // Send board membership revocation email
+  try {
+    transporter.sendMail(mailOptions);
+    console.log("Board membership revocation email sent to", boardMemberEmail);
+  } catch (error) {
+    console.log("Error sending board membership invitation email", error);
+  }
 };
 // Send Member Invite Function
 const sendMemberInvite = (email, firstname, verificationToken, boardOwner) => {
-    const verificationUrl = `${process.env.BASE_URL}/member/accept-invite-email?t=${verificationToken}`;
-    const mailOptions = {
-        from: process.env.MAIL_USER,
-        to: email,
-        subject: "Board Membership Invitation Email",
-        html: `<!DOCTYPE html>
+  const verificationUrl = `${process.env.BASE_URL}/member/accept-invite-email?t=${verificationToken}`;
+  const mailOptions = {
+    from: process.env.MAIL_USER,
+    to: email,
+    subject: "Board Membership Invitation Email",
+    html: `<!DOCTYPE html>
       <html lang="en">
       <head>
           <meta charset="UTF-8">
@@ -213,23 +217,22 @@ const sendMemberInvite = (email, firstname, verificationToken, boardOwner) => {
           </div>
       </body>
     </html>`,
-    };
-    // Send board membership invitation email
-    try {
-        transporter.sendMail(mailOptions);
-        console.log("Board membership invitation email sent to", email);
-    }
-    catch (error) {
-        console.log("Error sending board membership invitation email", error);
-    }
+  };
+  // Send board membership invitation email
+  try {
+    transporter.sendMail(mailOptions);
+    console.log("Board membership invitation email sent to", email);
+  } catch (error) {
+    console.log("Error sending board membership invitation email", error);
+  }
 };
 // Send Successful Board Membership Acceptance Email Function
 const sendSuccessMembershipAcceptanceEmail = (email, firstname) => {
-    const mailOptions = {
-        from: process.env.MAIL_USER,
-        to: email,
-        subject: "Successful Board Membership Acceptance",
-        html: `<!DOCTYPE html>
+  const mailOptions = {
+    from: process.env.MAIL_USER,
+    to: email,
+    subject: "Successful Board Membership Acceptance",
+    html: `<!DOCTYPE html>
         <html lang="en">
         <head>
             <meta charset="UTF-8">
@@ -364,24 +367,26 @@ const sendSuccessMembershipAcceptanceEmail = (email, firstname) => {
             </div>
         </body>
         </html>`,
-    };
-    // Send successful board membership acceptance email
-    try {
-        transporter.sendMail(mailOptions);
-        console.log("Board membership successful acceptance email sent to", email);
-    }
-    catch (error) {
-        console.log("Error sending board membership successful acceptance email", error);
-    }
+  };
+  // Send successful board membership acceptance email
+  try {
+    transporter.sendMail(mailOptions);
+    console.log("Board membership successful acceptance email sent to", email);
+  } catch (error) {
+    console.log(
+      "Error sending board membership successful acceptance email",
+      error,
+    );
+  }
 };
 // Verification Email Function
 const sendVerificationEmail = (email, firstname, verificationToken) => {
-    const verificationUrl = `${process.env.BASE_URL}/auth/verify-email?token=${verificationToken}`;
-    const mailOptions = {
-        from: process.env.MAIL_USER,
-        to: email,
-        subject: "Verify your Email",
-        html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+  const verificationUrl = `${process.env.BASE_URL}/auth/verify-email?token=${verificationToken}`;
+  const mailOptions = {
+    from: process.env.MAIL_USER,
+    to: email,
+    subject: "Verify your Email",
+    html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2>Email Verification</h2>
         <p>Hello ${firstname},</p>
         <p>Thank you for registering! Please click the button below to verify your email address:</p>
@@ -394,24 +399,23 @@ const sendVerificationEmail = (email, firstname, verificationToken) => {
         <p>${verificationUrl}</p>
         <p>This link will expire in 24 hours.</p>
       </div>`,
-    };
-    // Send verification email
-    try {
-        transporter.sendMail(mailOptions);
-        console.log("Verification email sent to", email);
-    }
-    catch (error) {
-        console.log("Error sending verification email", error);
-    }
+  };
+  // Send verification email
+  try {
+    transporter.sendMail(mailOptions);
+    console.log("Verification email sent to", email);
+  } catch (error) {
+    console.log("Error sending verification email", error);
+  }
 };
 // Password reset Email Function
 const sendPasswordResetEmail = (email, firstname, resetPasswordToken) => {
-    const resetPasswordUrl = `${process.env.BASE_URL}/auth/reset-password?token=${resetPasswordToken}`;
-    const mailOptions = {
-        from: process.env.MAIL_USER,
-        to: email,
-        subject: "Please Reset your Password",
-        html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+  const resetPasswordUrl = `${process.env.BASE_URL}/auth/reset-password?token=${resetPasswordToken}`;
+  const mailOptions = {
+    from: process.env.MAIL_USER,
+    to: email,
+    subject: "Please Reset your Password",
+    html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2>Password Reset</h2>
         <p>Hello ${firstname},</p>
         <p>You requested to reset your password. Click the button below to proceed:</p>
@@ -425,23 +429,22 @@ const sendPasswordResetEmail = (email, firstname, resetPasswordToken) => {
         <p>This link will expire in 30 minutes.</p>
         <p>If you didn't request this, please ignore this email.</p>
       </div>`,
-    };
-    // Send password reset email
-    try {
-        transporter.sendMail(mailOptions);
-        console.log("Password reset email sent to", email);
-    }
-    catch (error) {
-        console.log("Error sending password reset email", error);
-    }
+  };
+  // Send password reset email
+  try {
+    transporter.sendMail(mailOptions);
+    console.log("Password reset email sent to", email);
+  } catch (error) {
+    console.log("Error sending password reset email", error);
+  }
 };
 // Account successful verification email function
 const sendSuccessVerificationEmail = (email, firstname) => {
-    const mailOptions = {
-        from: process.env.MAIL_USER,
-        to: email,
-        subject: "Successful Account Verification",
-        html: `<!DOCTYPE html>
+  const mailOptions = {
+    from: process.env.MAIL_USER,
+    to: email,
+    subject: "Successful Account Verification",
+    html: `<!DOCTYPE html>
         <html lang="en">
         <head>
             <meta charset="UTF-8">
@@ -547,23 +550,22 @@ const sendSuccessVerificationEmail = (email, firstname) => {
             </div>
         </body>
         </html>`,
-    };
-    // Send account successful verification email
-    try {
-        transporter.sendMail(mailOptions);
-        console.log("Account successful verification email sent to", email);
-    }
-    catch (error) {
-        console.log("Error sending account successful verification email", error);
-    }
+  };
+  // Send account successful verification email
+  try {
+    transporter.sendMail(mailOptions);
+    console.log("Account successful verification email sent to", email);
+  } catch (error) {
+    console.log("Error sending account successful verification email", error);
+  }
 };
 // Successful Password Change Confirmation Email Function
 const sendPasswordUpdateConfirmationEmail = (email, firstname) => {
-    const mailOptions = {
-        from: process.env.MAIL_USER,
-        to: email,
-        subject: "Successful Password Change Confirmation",
-        html: `<!DOCTYPE html>
+  const mailOptions = {
+    from: process.env.MAIL_USER,
+    to: email,
+    subject: "Successful Password Change Confirmation",
+    html: `<!DOCTYPE html>
       <html lang="en">
       <head>
           <meta charset="UTF-8">
@@ -740,15 +742,22 @@ const sendPasswordUpdateConfirmationEmail = (email, firstname) => {
           </div>
       </body>
       </html>`,
-    };
-    // Send password update confirmation email
-    try {
-        transporter.sendMail(mailOptions);
-        console.log("Password update confirmation email sent to", email);
-    }
-    catch (error) {
-        console.log("Error sending password update confirmation email", error);
-    }
+  };
+  // Send password update confirmation email
+  try {
+    transporter.sendMail(mailOptions);
+    console.log("Password update confirmation email sent to", email);
+  } catch (error) {
+    console.log("Error sending password update confirmation email", error);
+  }
 };
-export { sendVerificationEmail, sendPasswordResetEmail, sendSuccessVerificationEmail, sendPasswordUpdateConfirmationEmail, sendMemberInvite, sendSuccessMembershipAcceptanceEmail, sendMembershipRemovalEmail, };
+export {
+  sendVerificationEmail,
+  sendPasswordResetEmail,
+  sendSuccessVerificationEmail,
+  sendPasswordUpdateConfirmationEmail,
+  sendMemberInvite,
+  sendSuccessMembershipAcceptanceEmail,
+  sendMembershipRemovalEmail,
+};
 //# sourceMappingURL=mailer.util.js.map

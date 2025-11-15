@@ -43,7 +43,11 @@ const UpdateBoardService = async (
     }
 
     // 3. Search for the board of the user
-    const board = await Board.findById<BoardDetailsType>(boardId).populate<{user_id: { _id: string, firstname: string, email: string }}>("user_id").exec();
+    const board = await Board.findById<BoardDetailsType>(boardId)
+      .populate<{
+        user_id: { _id: string; firstname: string; email: string };
+      }>("user_id")
+      .exec();
     if (!board) {
       return {
         success: false,

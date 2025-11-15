@@ -7,6 +7,7 @@ import RateLimiter from "../utils/rateLimit.util.js";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import VerifyBoardMemberService from "../services/member/verify.member.service.js";
+import UpdateMemberRoleService from "../services/member/update.member.service.js";
 
 const BoardMemberRouter = express.Router();
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -86,6 +87,7 @@ BoardMemberRouter.get(
   },
 );
 
+// Create a board member
 BoardMemberRouter.post(
   "/",
   RateLimiter,
@@ -161,6 +163,80 @@ BoardMemberRouter.delete(
       });
     } catch (error) {
       console.error("Error deleting board member", error);
+
+      return res.status(500).json({
+        success: false,
+        message: "Server Error. Please try again",
+      });
+    }
+  },
+);
+
+// Update controller for board member role
+/*
+#Plan:
+1. Validate all input data (board id, member id, owner id, role)
+2. Pass the input to the Update service
+3. Send the result to the client
+*/
+BoardMemberRouter.patch(
+  "/:memberId",
+  TokenExtraction,
+  async (req: Request, res: Response) => {
+    // 1. Validate all input data (board id, member id, owner id, role)
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        return res.status(400).json({
+          success: false,
+          message: "Owner Id required",
+        });
+      }
+
+      const memberId = req.params.memberId;
+      if (!memberId) {
+        return res.status(400).json({
+          success: false,
+          message: "Board member Id required",
+        });
+      }
+
+      const { board_id, role } = req.body;
+      if (!board_id) {
+        return res.status(400).json({
+          success: false,
+          message: "Board Id required",
+        });
+      }
+      if (!role) {
+        return res.status(400).json({
+          success: false,
+          message: "Role data required",
+        });
+      }
+
+      // 2. Pass the input to the Update service
+      const result = await UpdateMemberRoleService(userId, {
+        memberId,
+        board_id,
+        role,
+      });
+      if (!result.success) {
+        const statusCode = result.message.includes("Unauthorized") ? 403 : 400;
+        return res.status(statusCode).json({
+          success: false,
+          message: result.message,
+        });
+      }
+
+      // 3. Send the result to the client
+      return res.status(200).json({
+        success: true,
+        message: result.message,
+        member: result.member,
+      });
+    } catch (error) {
+      console.error("Error updating board member", error);
 
       return res.status(500).json({
         success: false,

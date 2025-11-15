@@ -5,7 +5,7 @@
 */
 import User from "../models/user.model.js";
 const ConfirmUserExists = async (email) => {
-    return await User.findOne({ email }).exec();
+  return await User.findOne({ email }).exec();
 };
 export default ConfirmUserExists;
 //# sourceMappingURL=user.exist.util.js.map

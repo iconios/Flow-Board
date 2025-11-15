@@ -91,9 +91,7 @@ io.on("connection", (socket) => {
   socket.on("room:leave", (roomId: string) => LeaveRoomUtility(socket, roomId));
 
   // Socket reorder list
-  socket.on("list:reorder", (payload) =>
-    ListReorderUtility(socket, payload),
-  );
+  socket.on("list:reorder", (payload) => ListReorderUtility(socket, payload));
 
   // Socket reorder task
   socket.on("task:reorder", (payload) => TaskReorderUtility(socket, payload));

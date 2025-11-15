@@ -113,7 +113,7 @@ export const ListReorderInputSchema = z
     data: z.object({
       listId: z.string(),
       position: z.number(),
-    })
+    }),
   })
   .strict();
 

@@ -116,3 +116,11 @@ const PopulatedBoardUserIdSchema = z.object({
 export type PopulatedBoardUserIdType = z.infer<
   typeof PopulatedBoardUserIdSchema
 >;
+
+export const UpdateMemberRoleSchema = z.object({
+  memberId: z.string(),
+  board_id: z.string(),
+  role: z.enum(["admin", "member"]),
+});
+
+export type UpdateMemberRoleType = z.infer<typeof UpdateMemberRoleSchema>;
