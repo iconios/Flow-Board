@@ -15,6 +15,8 @@ import RateLimiter from "../utils/rateLimit.util.js";
 import PasswordResetRequestService from "../services/auth/password.reset.auth.js";
 import VerifyPasswordResetService from "../services/auth/verify.password.reset.auth.js";
 import PasswordUpdateService from "../services/auth/password.update.auth.js";
+import TokenExtraction from "../middlewares/token.extraction.util.js";
+import DeleteUserService from "../services/user/delete.user.service.js";
 const AuthRouter = express.Router();
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -204,5 +206,46 @@ AuthRouter.post(
     }
   },
 );
+
+
+// Delete User Controller
+/*
+#Plan
+1. Confirm user id availability
+2. Pass the user id to the DeleteUserService
+3. Return result to client
+*/
+AuthRouter.delete("/delete/user",
+  TokenExtraction,
+  async (req: Request, res: Response) => {
+    try {
+      // 1. Confirm user id availability
+      const userId = req.userId;
+      if (!userId?.trim()) {
+        return res.status(401).json({
+          success: false,
+          message: "User authentication required"
+        })
+      }
+
+      // 2. Pass the user id to the DeleteUserService
+      const result = await DeleteUserService(userId);
+      if (!result.success) {
+        console.log("User deletion failed");
+        return res.status(400).json(result);
+      }
+
+      // 3. Return result to client
+      return res.status(200).json(result)
+    } catch (error) {
+      console.error("Unknown error", error);
+
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  }
+)
 
 export default AuthRouter;
