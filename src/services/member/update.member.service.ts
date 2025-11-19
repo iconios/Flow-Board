@@ -60,6 +60,7 @@ const UpdateMemberRoleService = async (
         .exec(),
     ]);
     if (!ownerOwnsBoard) {
+      console.log("Owner Owns Board?", ownerOwnsBoard);
       return {
         success: false,
         message: "Unauthorized or board not found",

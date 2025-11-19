@@ -59,6 +59,8 @@ const ReadCommentOutputSchema = z.object({
         content: z.string(),
         createdAt: z.iso.datetime(),
         updatedAt: z.iso.datetime(),
+        userId: z.string(),
+        taskId: z.string(),
       }),
     )
     .optional(),

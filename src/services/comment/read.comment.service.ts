@@ -69,6 +69,7 @@ const ReadCommentService = async (
       createdAt: comment.createdAt.toISOString(),
       updatedAt: comment.updatedAt.toISOString(),
       taskId: comment.taskId.toString(),
+      userId: comment.userId.toString(),
     }));
 
     return {

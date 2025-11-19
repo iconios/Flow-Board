@@ -5,21 +5,25 @@
 3. Start transaction session for cascade deletion
 4. Find the board in the session
 5. Find all the lists IDs associated with the board
-6. Find and Delete all the tasks associated with each list
-7. Delete all the identified lists associated with the board
-8. Delete the board
-9. Send op status to the client
+6. Find all the tasks associated with each list in the board
+7. Find and Delete all the comments associated with each task in each list
+8. Delete all the tasks associated with each list
+9. Delete all the identified lists associated with the board
+10. Delete the board
+11. Send op status to the client
 */
 
-import { MongooseError, Types } from "mongoose";
+import { MongooseError, Types, type ClientSession } from "mongoose";
 import Board from "../../models/board.model.js";
 import type { BoardDeleteOutputType } from "../../types/board.type.js";
 import List from "../../models/list.model.js";
 import Task from "../../models/task.model.js";
+import Comment from "../../models/comment.model.js";
 
 const DeleteBoardService = async (
   boardId: string,
   userId: string,
+  clientSession?: ClientSession,
 ): Promise<BoardDeleteOutputType> => {
   // 1. Receive and validate the board ID
   const trimmedBoardId = boardId.trim();
@@ -43,7 +47,8 @@ const DeleteBoardService = async (
   const userObjId = new Types.ObjectId(trimmedUserId);
 
   // 3. Start transaction session for cascade deletion
-  const session = await Board.startSession();
+  const shouldEndSession = !clientSession;
+  const session = clientSession || await Board.startSession();
   let boardDeleted: boolean = false;
 
   try {
@@ -65,14 +70,26 @@ const DeleteBoardService = async (
       if (lists.length > 0) {
         const listIds = lists.map((list) => list._id);
 
-        // 6. Find and Delete all the tasks associated with each list
-        await Task.deleteMany({ list_id: { $in: listIds } }).session(session);
+        // 6. Find all the tasks associated with each list in the board
+        const allTasks = await Task.find({ listId: { $in: listIds } }).session(
+          session,
+        );
+        if (allTasks.length > 0) {
+          const taskIds = allTasks.map((task) => task._id);
+          // 7. Find and Delete all the comments associated with each task in each list
+          await Comment.deleteMany({ taskId: { $in: taskIds } }).session(
+            session,
+          );
 
-        // 7. Delete all the identified lists associated with the board
-        await List.deleteMany({ board_id: boardObjId }).session(session);
+          // 8. Delete all the tasks associated with each list
+          await Task.deleteMany({ listId: { $in: listIds } }).session(session);
+        }
+
+        // 9. Delete all the identified lists associated with the board
+        await List.deleteMany({ boardId: boardObjId }).session(session);
       }
 
-      // 8. Delete the board
+      // 10. Delete the board
       const { deletedCount } = await Board.deleteOne({
         _id: boardObjId,
         user_id: userObjId,
@@ -81,10 +98,10 @@ const DeleteBoardService = async (
       boardDeleted = deletedCount > 0;
     });
 
-    // 9. Send op status to client
+    // 11. Send op status to client
     if (!boardDeleted) {
       return {
-        success: true,
+        success: false,
         message: "Board already deleted or not found",
       };
     }
@@ -108,8 +125,10 @@ const DeleteBoardService = async (
       message: "Unexpected error while deleting board",
     };
   } finally {
-    // End the session
-    await session.endSession();
+    // Only end the session created in this service
+    if (shouldEndSession) {      
+      await session.endSession();
+    }
   }
 };
 
