@@ -4,6 +4,7 @@ import RateLimiter from "../utils/rateLimit.util.js";
 import { UserEmailSchema } from "../types/user.type.js";
 import { ZodError } from "zod";
 import TokenExtraction from "../middlewares/token.extraction.util.js";
+import DeleteUserService from "../services/user/delete.user.service.js";
 
 const UserRouter = express.Router();
 
@@ -60,6 +61,48 @@ UserRouter.get(
         success: false,
         message: "Internal server error",
         data: null,
+      });
+    }
+  },
+);
+
+// Delete User Controller
+/*
+#Plan
+1. Confirm user id availability
+2. Pass the user id to the DeleteUserService
+3. Return result to client
+*/
+UserRouter.delete(
+  "/delete",
+  TokenExtraction,
+  async (req: Request, res: Response) => {
+    try {
+      // 1. Confirm user id availability
+      const userId = req.userId;
+      if (!userId?.trim()) {
+        return res.status(401).json({
+          success: false,
+          message: "User authentication required",
+        });
+      }
+
+      // 2. Pass the user id to the DeleteUserService
+      const result = await DeleteUserService(userId);
+      if (!result.success) {
+        console.log("User deletion failed");
+        return res.status(400).json(result);
+      }
+
+      // 3. Return result to client
+      console.log("User deletion successful");
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error("Unknown error", error);
+
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
       });
     }
   },

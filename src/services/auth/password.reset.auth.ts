@@ -49,7 +49,7 @@ const PasswordResetRequestService = async (
     return {
       success: true,
       message:
-        "If an account with that email exists, a reset link has been sent",
+        "Check your email for reset link",
       error: "Null",
     };
   } catch (error) {
