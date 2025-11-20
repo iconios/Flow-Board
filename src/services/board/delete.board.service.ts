@@ -9,8 +9,9 @@
 7. Find and Delete all the comments associated with each task in each list
 8. Delete all the tasks associated with each list
 9. Delete all the identified lists associated with the board
-10. Delete the board
-11. Send op status to the client
+10. Delete all the board members
+11. Delete the board
+12. Send op status to the client
 */
 
 import { MongooseError, Types, type ClientSession } from "mongoose";
@@ -19,6 +20,7 @@ import type { BoardDeleteOutputType } from "../../types/board.type.js";
 import List from "../../models/list.model.js";
 import Task from "../../models/task.model.js";
 import Comment from "../../models/comment.model.js";
+import BoardMember from "../../models/boardMember.model.js";
 
 const DeleteBoardService = async (
   boardId: string,
@@ -92,7 +94,12 @@ const DeleteBoardService = async (
       }).session(session);
     }
 
-    // 10. Delete the board
+    // 10. Delete all the board members
+    await BoardMember.deleteMany({
+      board_id: boardObjId
+    }).session(session);
+
+    // 11. Delete the board
     const { deletedCount } = await Board.deleteOne({
       _id: boardObjId,
       user_id: userObjId,
@@ -108,7 +115,7 @@ const DeleteBoardService = async (
       await run();
     }
 
-    // 11. Send op status to client
+    // 12. Send op status to client
     if (!boardDeleted) {
       return {
         success: false,
