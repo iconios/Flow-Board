@@ -4,33 +4,27 @@ dotenv.config();
 const environment = process.env.NODE_ENV;
 
 // Create transporter
-const transporter = nodemailer.createTransport({
+export const transporter = nodemailer.createTransport({
   host: process.env.MAIL_HOST,
   port: Number(process.env.MAIL_PORT),
-  secure: environment === "development",
+  secure: false,
   auth: {
     user: process.env.MAIL_USER,
     pass: process.env.MAIL_PASSWORD,
   },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 20000,
-  tls: {
-    servername: "smtp.mail.yahoo.com",
-    minVersion: "TLSv1.2",
-    rejectUnauthorized: environment === "development",
-  },
 });
 
 // Verify transporter
-transporter.verify((error, success) => {
-  if (error) {
-    console.log("Error with email configuration", error);
-  }
-  if (success) {
-    console.log("Server is ready to send emails");
-  }
-});
+export const verifyMailer = async () => {
+    if (process.env.NODE_ENV === "test") return;
+
+    try {
+        await transporter.verify();
+        console.log("Server is ready to send emails");
+    } catch (error) {
+        console.log("Error with email configuration", error);
+    }
+};
 
 // Send Board Membership Removal Email Function
 const sendMembershipRemovalEmail = (
