@@ -1,0 +1,42 @@
+import { transporter } from "../mailer.util.js";
+
+// Password reset Email Function
+const sendPasswordResetEmail = async (
+  email: string,
+  firstname: string,
+  resetPasswordToken: string,
+) => {
+  const resetPasswordUrl = `${process.env.BASE_URL}/auth/reset-password?token=${resetPasswordToken}`;
+  const fromAddress = `"${process.env.APP_NAME}" <${process.env.MAIL_FROM}>`;
+  const mailOptions = {
+    from: fromAddress,
+    to: email,
+    subject: "Please Reset your Password",
+    html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Password Reset</h2>
+        <p>Hello ${firstname},</p>
+        <p>You requested to reset your password. Click the button below to proceed:</p>
+        <a href="${resetPasswordUrl}" 
+           style="display: inline-block; padding: 12px 24px; background-color: #dc3545; 
+                  color: white; text-decoration: none; border-radius: 4px; margin: 20px 0;">
+          Reset Password
+        </a>
+        <p>Or copy and paste this link in your browser:</p>
+        <p>${resetPasswordUrl}</p>
+        <p>This link will expire in 30 minutes.</p>
+        <p>If you didn't request this, please ignore this email.</p>
+      </div>`,
+  };
+
+  // Send password reset email
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log("Password reset email sent to", email);
+  } catch (error) {
+    console.log("Error sending password reset email", error);
+  }
+};
+
+export {
+    sendPasswordResetEmail,
+}

@@ -9,7 +9,7 @@
 
 import BoardMember from "../../models/boardMember.model.js";
 import User from "../../models/user.model.js";
-import { sendSuccessMembershipAcceptanceEmail } from "../../utils/mailer.util.js";
+import { sendSuccessMembershipAcceptanceEmail } from "../../utils/emails/success.member.acceptance.email.js";
 
 const VerifyBoardMemberService = async (verificationToken: string) => {
   // 1. Check if a member exists with the verification token and update the verification fields

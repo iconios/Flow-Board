@@ -1,0 +1,41 @@
+import { transporter } from "../mailer.util.js";
+
+// Verification Email Function
+const sendVerificationEmail = async (
+  email: string,
+  firstname: string,
+  verificationToken: string,
+) => {
+  const verificationUrl = `${process.env.BASE_URL}/auth/verify-email?token=${verificationToken}`;
+  const fromAddress = `"${process.env.APP_NAME}" <${process.env.MAIL_FROM}>`;
+  const mailOptions = {
+    from: fromAddress,
+    to: email,
+    subject: "Verify your Email",
+    html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Email Verification</h2>
+        <p>Hello ${firstname},</p>
+        <p>Thank you for registering! Please click the button below to verify your email address:</p>
+        <a href="${verificationUrl}" 
+           style="display: inline-block; padding: 12px 24px; background-color: #007bff; 
+                  color: white; text-decoration: none; border-radius: 4px; margin: 20px 0;">
+          Verify Email
+        </a>
+        <p>Or copy and paste this link in your browser:</p>
+        <p>${verificationUrl}</p>
+        <p>This link will expire in 24 hours.</p>
+      </div>`,
+  };
+
+  // Send verification email
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log("Verification email sent to", email);
+  } catch (error) {
+    console.log("Error sending verification email", error);
+  }
+};
+
+export {
+    sendVerificationEmail,
+}

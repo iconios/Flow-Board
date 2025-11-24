@@ -22,7 +22,7 @@ import BoardMember from "../../models/boardMember.model.js";
 import { MongooseError, Types } from "mongoose";
 import Board from "../../models/board.model.js";
 import User from "../../models/user.model.js";
-import { sendMemberInvite } from "../../utils/mailer.util.js";
+import { sendMemberInvite } from "../../utils/emails/member.invite.email.js";
 
 const CreateMemberService = async (
   boardOwner: string,

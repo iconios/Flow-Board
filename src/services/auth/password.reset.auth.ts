@@ -9,7 +9,7 @@
 
 import User from "../../models/user.model.js";
 import type { UserLoginMessageType } from "../../types/user.type.js";
-import { sendPasswordResetEmail } from "../../utils/mailer.util.js";
+import { sendPasswordResetEmail } from "../../utils/emails/password.reset.email.js";
 
 const PasswordResetRequestService = async (
   rawEmail: string,

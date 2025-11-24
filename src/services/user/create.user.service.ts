@@ -19,7 +19,7 @@ import { ZodError } from "zod";
 import * as dotenv from "dotenv";
 dotenv.config();
 import ConfirmUserExists from "../../utils/user.exist.util.js";
-import { sendVerificationEmail } from "../../utils/mailer.util.js";
+import { sendVerificationEmail } from "../../utils/emails/verification.email.js";
 
 const CreateUserService = async (
   createUserInput: UserInputType,

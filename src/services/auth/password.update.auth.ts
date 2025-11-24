@@ -17,7 +17,7 @@ import {
 } from "../../types/user.type.js";
 import bcrypt from "bcrypt";
 import * as dotenv from "dotenv";
-import { sendPasswordUpdateConfirmationEmail } from "../../utils/mailer.util.js";
+import { sendPasswordUpdateConfirmationEmail } from "../../utils/emails/password.update.confirm.email.js";
 dotenv.config();
 
 const PasswordUpdateService = async (

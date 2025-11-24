@@ -15,7 +15,7 @@ import type {
   UserCreateType,
 } from "../../types/user.type.js";
 import jwt from "jsonwebtoken";
-import { sendSuccessVerificationEmail } from "../../utils/mailer.util.js";
+import { sendSuccessVerificationEmail } from "../../utils/emails/success.verification.email.js";
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const VerifyEmailAuth = async (

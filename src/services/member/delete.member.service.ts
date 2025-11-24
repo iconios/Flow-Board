@@ -11,11 +11,11 @@
 import Board from "../../models/board.model.js";
 import BoardMember from "../../models/boardMember.model.js";
 import { MongooseError, Types } from "mongoose";
-import { sendMembershipRemovalEmail } from "../../utils/mailer.util.js";
 import type {
   PopulatedBoardUserIdType,
   PopulatedMemberUserIdType,
 } from "../../types/member.type.js";
+import { sendMembershipRemovalEmail } from "../../utils/emails/member.removal.email.js";
 
 const DeleteMemberService = async (ownerId: string, memberId: string) => {
   try {

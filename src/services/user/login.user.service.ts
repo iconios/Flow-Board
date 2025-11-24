@@ -19,7 +19,7 @@ import jwt from "jsonwebtoken";
 import * as dotenv from "dotenv";
 import { ZodError } from "zod";
 import ConfirmUserExists from "../../utils/user.exist.util.js";
-import { sendVerificationEmail } from "../../utils/mailer.util.js";
+import { sendVerificationEmail } from "../../utils/emails/verification.email.js";
 dotenv.config();
 
 const UserLoginService = async (
