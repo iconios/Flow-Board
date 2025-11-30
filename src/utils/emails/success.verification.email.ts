@@ -5,10 +5,11 @@ import { transporter } from "../mailer.util.js";
 const sendSuccessVerificationEmail = async (email: string, firstname: string) => {
   const fromAddress = `"${process.env.APP_NAME}" <${process.env.MAIL_FROM}>`;
   const mailOptions = {
-    from: fromAddress,
-    to: email,
-    subject: "Successful Account Verification",
-    html: `<!DOCTYPE html>
+    From: fromAddress,
+    To: email,
+    Subject: "Successful Account Verification",
+    MessageStream: "outbound",
+    HtmlBody: `<!DOCTYPE html>
         <html lang="en">
         <head>
             <meta charset="UTF-8">
@@ -118,7 +119,7 @@ const sendSuccessVerificationEmail = async (email: string, firstname: string) =>
 
   // Send account successful verification email
   try {
-    await transporter.sendMail(mailOptions);
+    await transporter.sendEmail(mailOptions);
     console.log("Account successful verification email sent to", email);
   } catch (error) {
     console.log("Error sending account successful verification email", error);

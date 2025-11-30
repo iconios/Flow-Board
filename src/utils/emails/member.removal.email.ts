@@ -9,10 +9,11 @@ const sendMembershipRemovalEmail = async (
 ) => {
   const fromAddress = `"${process.env.APP_NAME}" <${process.env.MAIL_FROM}>`;
   const mailOptions = {
-    from: fromAddress,
-    to: boardMemberEmail,
-    subject: "Board Membership Update",
-    html: `<!DOCTYPE html>
+    From: fromAddress,
+    To: boardMemberEmail,
+    Subject: "Board Membership Update",
+    MessageStream: "outbound",
+    HtmlBody: `<!DOCTYPE html>
             <html lang="en">
             <head>
                 <meta charset="UTF-8">
@@ -66,7 +67,7 @@ const sendMembershipRemovalEmail = async (
 
   // Send board membership revocation email
   try {
-    await transporter.sendMail(mailOptions);
+    await transporter.sendEmail(mailOptions);
     console.log("Board membership revocation email sent to", boardMemberEmail);
   } catch (error) {
     console.log("Error sending board membership invitation email", error);

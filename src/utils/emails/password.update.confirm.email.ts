@@ -8,10 +8,11 @@ const sendPasswordUpdateConfirmationEmail = async (
 ) => {
   const fromAddress = `"${process.env.APP_NAME}" <${process.env.MAIL_FROM}>`;
   const mailOptions = {
-    from: fromAddress,
-    to: email,
-    subject: "Successful Password Change Confirmation",
-    html: `<!DOCTYPE html>
+    From: fromAddress,
+    To: email,
+    Subject: "Successful Password Change Confirmation",
+    MessageStream: "outbound",
+    HtmlBody: `<!DOCTYPE html>
       <html lang="en">
       <head>
           <meta charset="UTF-8">
@@ -192,7 +193,7 @@ const sendPasswordUpdateConfirmationEmail = async (
 
   // Send password update confirmation email
   try {
-    await transporter.sendMail(mailOptions);
+    await transporter.sendEmail(mailOptions);
     console.log("Password update confirmation email sent to", email);
   } catch (error) {
     console.log("Error sending password update confirmation email", error);

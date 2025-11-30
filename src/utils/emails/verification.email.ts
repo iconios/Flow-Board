@@ -9,10 +9,11 @@ const sendVerificationEmail = async (
   const verificationUrl = `${process.env.BASE_URL}/auth/verify-email?token=${verificationToken}`;
   const fromAddress = `"${process.env.APP_NAME}" <${process.env.MAIL_FROM}>`;
   const mailOptions = {
-    from: fromAddress,
-    to: email,
-    subject: "Verify your Email",
-    html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    From: fromAddress,
+    To: email,
+    Subject: "Verify your Email",
+    MessageStream: "outbound",
+    HtmlBody: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2>Email Verification</h2>
         <p>Hello ${firstname},</p>
         <p>Thank you for registering! Please click the button below to verify your email address:</p>
@@ -29,7 +30,7 @@ const sendVerificationEmail = async (
 
   // Send verification email
   try {
-    await transporter.sendMail(mailOptions);
+    await transporter.sendEmail(mailOptions);
     console.log("Verification email sent to", email);
   } catch (error) {
     console.log("Error sending verification email", error);
