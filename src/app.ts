@@ -2,6 +2,8 @@
 import express, { type Request, type Response } from "express";
 import cors from "cors";
 import helmet from "helmet";
+import * as dotenv from "dotenv";
+dotenv.config();
 
 import UserRouter from "./controllers/user.controller.js";
 import AuthRouter from "./controllers/auth.controller.js";
@@ -21,6 +23,7 @@ export function createApp() {
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "https://localhost:3000",
+        `${process.env.BASE_URL}`
       ],
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"],
