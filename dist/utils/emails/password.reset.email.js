@@ -4,10 +4,11 @@ const sendPasswordResetEmail = async (email, firstname, resetPasswordToken) => {
     const resetPasswordUrl = `${process.env.BASE_URL}/auth/reset-password?token=${resetPasswordToken}`;
     const fromAddress = `"${process.env.APP_NAME}" <${process.env.MAIL_FROM}>`;
     const mailOptions = {
-        from: fromAddress,
-        to: email,
-        subject: "Please Reset your Password",
-        html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        From: fromAddress,
+        To: email,
+        Subject: "Please Reset your Password",
+        MessageStream: "outbound",
+        HtmlBody: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2>Password Reset</h2>
         <p>Hello ${firstname},</p>
         <p>You requested to reset your password. Click the button below to proceed:</p>
@@ -24,7 +25,7 @@ const sendPasswordResetEmail = async (email, firstname, resetPasswordToken) => {
     };
     // Send password reset email
     try {
-        await transporter.sendMail(mailOptions);
+        await transporter.sendEmail(mailOptions);
         console.log("Password reset email sent to", email);
     }
     catch (error) {

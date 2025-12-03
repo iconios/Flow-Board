@@ -4,10 +4,11 @@ const sendMemberInvite = async (email, firstname, verificationToken, boardOwner)
     const verificationUrl = `${process.env.BASE_URL}/member/accept-invite-email?t=${verificationToken}`;
     const fromAddress = `"${process.env.APP_NAME}" <${process.env.MAIL_FROM}>`;
     const mailOptions = {
-        from: fromAddress,
-        to: email,
-        subject: "Board Membership Invitation Email",
-        html: `<!DOCTYPE html>
+        From: fromAddress,
+        To: email,
+        Subject: "Board Membership Invitation Email",
+        MessageStream: "outbound",
+        HtmlBody: `<!DOCTYPE html>
       <html lang="en">
       <head>
           <meta charset="UTF-8">
@@ -121,7 +122,7 @@ const sendMemberInvite = async (email, firstname, verificationToken, boardOwner)
     };
     // Send board membership invitation email
     try {
-        await transporter.sendMail(mailOptions);
+        await transporter.sendEmail(mailOptions);
         console.log("Board membership invitation email sent to", email);
     }
     catch (error) {

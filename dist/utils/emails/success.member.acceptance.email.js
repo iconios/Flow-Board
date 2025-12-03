@@ -3,10 +3,11 @@ import { transporter } from "../mailer.util.js";
 const sendSuccessMembershipAcceptanceEmail = async (email, firstname) => {
     const fromAddress = `"${process.env.APP_NAME}" <${process.env.MAIL_FROM}>`;
     const mailOptions = {
-        from: fromAddress,
-        to: email,
-        subject: "Successful Board Membership Acceptance",
-        html: `<!DOCTYPE html>
+        From: fromAddress,
+        To: email,
+        Subject: "Successful Board Membership Acceptance",
+        MessageStream: "outbound",
+        HtmlBody: `<!DOCTYPE html>
         <html lang="en">
         <head>
             <meta charset="UTF-8">
@@ -144,7 +145,7 @@ const sendSuccessMembershipAcceptanceEmail = async (email, firstname) => {
     };
     // Send successful board membership acceptance email
     try {
-        await transporter.sendMail(mailOptions);
+        await transporter.sendEmail(mailOptions);
         console.log("Board membership successful acceptance email sent to", email);
     }
     catch (error) {
