@@ -160,6 +160,4 @@ const sendSuccessMembershipAcceptanceEmail = async (
   }
 };
 
-export {
-    sendSuccessMembershipAcceptanceEmail,
-}
+export { sendSuccessMembershipAcceptanceEmail };

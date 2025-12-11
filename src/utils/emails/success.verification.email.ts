@@ -1,8 +1,10 @@
 import { transporter } from "../mailer.util.js";
 
-
 // Account successful verification email function
-const sendSuccessVerificationEmail = async (email: string, firstname: string) => {
+const sendSuccessVerificationEmail = async (
+  email: string,
+  firstname: string,
+) => {
   const fromAddress = `"${process.env.APP_NAME}" <${process.env.MAIL_FROM}>`;
   const mailOptions = {
     From: fromAddress,
@@ -126,6 +128,4 @@ const sendSuccessVerificationEmail = async (email: string, firstname: string) =>
   }
 };
 
-export {
-    sendSuccessVerificationEmail,
-}
+export { sendSuccessVerificationEmail };

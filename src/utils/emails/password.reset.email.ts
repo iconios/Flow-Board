@@ -38,6 +38,4 @@ const sendPasswordResetEmail = async (
   }
 };
 
-export {
-    sendPasswordResetEmail,
-}
+export { sendPasswordResetEmail };

@@ -1,13 +1,13 @@
 import { transporter } from "../mailer.util.js";
 // Successful Password Change Confirmation Email Function
 const sendPasswordUpdateConfirmationEmail = async (email, firstname) => {
-    const fromAddress = `"${process.env.APP_NAME}" <${process.env.MAIL_FROM}>`;
-    const mailOptions = {
-        From: fromAddress,
-        To: email,
-        Subject: "Successful Password Change Confirmation",
-        MessageStream: "outbound",
-        HtmlBody: `<!DOCTYPE html>
+  const fromAddress = `"${process.env.APP_NAME}" <${process.env.MAIL_FROM}>`;
+  const mailOptions = {
+    From: fromAddress,
+    To: email,
+    Subject: "Successful Password Change Confirmation",
+    MessageStream: "outbound",
+    HtmlBody: `<!DOCTYPE html>
       <html lang="en">
       <head>
           <meta charset="UTF-8">
@@ -184,15 +184,14 @@ const sendPasswordUpdateConfirmationEmail = async (email, firstname) => {
           </div>
       </body>
       </html>`,
-    };
-    // Send password update confirmation email
-    try {
-        await transporter.sendEmail(mailOptions);
-        console.log("Password update confirmation email sent to", email);
-    }
-    catch (error) {
-        console.log("Error sending password update confirmation email", error);
-    }
+  };
+  // Send password update confirmation email
+  try {
+    await transporter.sendEmail(mailOptions);
+    console.log("Password update confirmation email sent to", email);
+  } catch (error) {
+    console.log("Error sending password update confirmation email", error);
+  }
 };
-export { sendPasswordUpdateConfirmationEmail, };
+export { sendPasswordUpdateConfirmationEmail };
 //# sourceMappingURL=password.update.confirm.email.js.map

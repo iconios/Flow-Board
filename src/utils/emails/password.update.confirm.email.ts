@@ -1,6 +1,5 @@
 import { transporter } from "../mailer.util.js";
 
-
 // Successful Password Change Confirmation Email Function
 const sendPasswordUpdateConfirmationEmail = async (
   email: string,
@@ -200,6 +199,4 @@ const sendPasswordUpdateConfirmationEmail = async (
   }
 };
 
-export {
-    sendPasswordUpdateConfirmationEmail,
-}
+export { sendPasswordUpdateConfirmationEmail };

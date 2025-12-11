@@ -48,8 +48,7 @@ const PasswordResetRequestService = async (
     // Notify the caller
     return {
       success: true,
-      message:
-        "Check your email for reset link",
+      message: "Check your email for reset link",
       error: "Null",
     };
   } catch (error) {

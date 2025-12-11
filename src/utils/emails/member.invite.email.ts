@@ -136,6 +136,4 @@ const sendMemberInvite = async (
   }
 };
 
-export {
-    sendMemberInvite,
-}
+export { sendMemberInvite };

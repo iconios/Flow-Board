@@ -1,14 +1,14 @@
 import { transporter } from "../mailer.util.js";
 // Verification Email Function
 const sendVerificationEmail = async (email, firstname, verificationToken) => {
-    const verificationUrl = `${process.env.BASE_URL}/auth/verify-email?token=${verificationToken}`;
-    const fromAddress = `"${process.env.APP_NAME}" <${process.env.MAIL_FROM}>`;
-    const mailOptions = {
-        From: fromAddress,
-        To: email,
-        Subject: "Verify your Email",
-        MessageStream: "outbound",
-        HtmlBody: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+  const verificationUrl = `${process.env.BASE_URL}/auth/verify-email?token=${verificationToken}`;
+  const fromAddress = `"${process.env.APP_NAME}" <${process.env.MAIL_FROM}>`;
+  const mailOptions = {
+    From: fromAddress,
+    To: email,
+    Subject: "Verify your Email",
+    MessageStream: "outbound",
+    HtmlBody: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2>Email Verification</h2>
         <p>Hello ${firstname},</p>
         <p>Thank you for registering! Please click the button below to verify your email address:</p>
@@ -21,15 +21,14 @@ const sendVerificationEmail = async (email, firstname, verificationToken) => {
         <p>${verificationUrl}</p>
         <p>This link will expire in 24 hours.</p>
       </div>`,
-    };
-    // Send verification email
-    try {
-        await transporter.sendEmail(mailOptions);
-        console.log("Verification email sent to", email);
-    }
-    catch (error) {
-        console.log("Error sending verification email", error);
-    }
+  };
+  // Send verification email
+  try {
+    await transporter.sendEmail(mailOptions);
+    console.log("Verification email sent to", email);
+  } catch (error) {
+    console.log("Error sending verification email", error);
+  }
 };
-export { sendVerificationEmail, };
+export { sendVerificationEmail };
 //# sourceMappingURL=verification.email.js.map

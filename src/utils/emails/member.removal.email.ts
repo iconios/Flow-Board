@@ -74,6 +74,4 @@ const sendMembershipRemovalEmail = async (
   }
 };
 
-export {
-    sendMembershipRemovalEmail
-}
+export { sendMembershipRemovalEmail };

@@ -37,6 +37,4 @@ const sendVerificationEmail = async (
   }
 };
 
-export {
-    sendVerificationEmail,
-}
+export { sendVerificationEmail };

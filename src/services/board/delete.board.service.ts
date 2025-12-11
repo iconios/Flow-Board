@@ -96,7 +96,7 @@ const DeleteBoardService = async (
 
     // 10. Delete all the board members
     await BoardMember.deleteMany({
-      board_id: boardObjId
+      board_id: boardObjId,
     }).session(session);
 
     // 11. Delete the board

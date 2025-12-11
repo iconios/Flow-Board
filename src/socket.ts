@@ -21,7 +21,9 @@ export function createSocketServer(server: HttpServer) {
     console.log(`User ${socket.id} connected`);
 
     socket.on("room:join", (roomId: string) => JoinRoomUtility(socket, roomId));
-    socket.on("room:leave", (roomId: string) => LeaveRoomUtility(socket, roomId));
+    socket.on("room:leave", (roomId: string) =>
+      LeaveRoomUtility(socket, roomId),
+    );
     socket.on("list:reorder", (payload) => ListReorderUtility(socket, payload));
     socket.on("task:reorder", (payload) => TaskReorderUtility(socket, payload));
     socket.on("task:move", (payload) => TaskMoveUtility(socket, payload));

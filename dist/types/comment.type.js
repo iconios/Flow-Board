@@ -1,54 +1,56 @@
 import { z } from "zod";
 export const CreateCommentInputSchema = z
-    .object({
+  .object({
     content: z.string().trim(),
-})
-    .strict();
+  })
+  .strict();
 const CreateCommentOutputSchema = z.object({
-    success: z.boolean(),
-    message: z.string(),
-    comment: z
-        .object({
-        id: z.string(),
-        content: z.string(),
-        userId: z.string(),
-        taskId: z.string(),
-        createdAt: z.string(),
+  success: z.boolean(),
+  message: z.string(),
+  comment: z
+    .object({
+      id: z.string(),
+      content: z.string(),
+      userId: z.string(),
+      taskId: z.string(),
+      createdAt: z.string(),
     })
-        .optional(),
+    .optional(),
 });
 export const UpdateCommentInputSchema = z
-    .object({
+  .object({
     content: z.string().trim(),
-})
-    .strict();
+  })
+  .strict();
 const UpdateCommentOutputSchema = z.object({
-    success: z.boolean(),
-    message: z.string(),
-    comment: z
-        .object({
-        id: z.string(),
-        userId: z.string(),
-        taskId: z.string(),
-        content: z.string(),
-        updatedAt: z.string(),
-        createdAt: z.string(),
+  success: z.boolean(),
+  message: z.string(),
+  comment: z
+    .object({
+      id: z.string(),
+      userId: z.string(),
+      taskId: z.string(),
+      content: z.string(),
+      updatedAt: z.string(),
+      createdAt: z.string(),
     })
-        .optional(),
+    .optional(),
 });
 const ReadCommentOutputSchema = z.object({
-    success: z.boolean(),
-    message: z.string(),
-    comments: z
-        .array(z.object({
+  success: z.boolean(),
+  message: z.string(),
+  comments: z
+    .array(
+      z.object({
         id: z.string(),
         content: z.string(),
         createdAt: z.iso.datetime(),
         updatedAt: z.iso.datetime(),
         userId: z.string(),
         taskId: z.string(),
-    }))
-        .optional(),
-    count: z.number().optional(),
+      }),
+    )
+    .optional(),
+  count: z.number().optional(),
 });
 //# sourceMappingURL=comment.type.js.map

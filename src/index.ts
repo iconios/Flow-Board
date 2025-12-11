@@ -6,7 +6,7 @@ import createApp from "./app.js";
 import { createSocketServer } from "./socket.js";
 import { verifyMailer } from "./utils/mailer.util.js";
 
-dotenv.config({ quiet: true }); 
+dotenv.config({ quiet: true });
 if (process.env.NODE_ENV !== "test") {
   await verifyMailer();
 }
