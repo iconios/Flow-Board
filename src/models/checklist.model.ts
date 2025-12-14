@@ -9,10 +9,18 @@ const ChecklistSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
+    index: true,
   },
   taskId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Task",
+    required: true,
+    index: true,
+  },
+  boardId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Board",
+    index: true,
     required: true,
   },
   checked: {
