@@ -15,6 +15,7 @@ import {
 import Checklist from "../../models/checklist.model.js";
 import Board from "../../models/board.model.js";
 import BoardMember from "../../models/boardMember.model.js";
+import { produceActivity } from "../../redis/activity.producer.js";
 
 const DeleteChecklistService = async (
   deleteChecklistInput: DeleteChecklistInputType,
@@ -115,6 +116,18 @@ const DeleteChecklistService = async (
       .lean()
       .exec();
     const isDeleted = deletedChecklist.deletedCount > 0;
+
+    // Create activity log for checklist deletion
+    if (isDeleted) {
+      await produceActivity({
+        userId,
+        activityType: "delete",
+        object: "Checklist",
+        objectId: checklistId,
+      });
+      console.log(`Activity log produced for checklist deletion: ${checklistId}`);
+    }
+
     return {
       success: isDeleted,
       message: isDeleted

@@ -18,6 +18,7 @@ import {
 import mongoose, { MongooseError } from "mongoose";
 import Board from "../../models/board.model.js";
 import BoardMember from "../../models/boardMember.model.js";
+import { produceActivity } from "../../redis/activity.producer.js";
 
 const CreateListService = async (
   userId: string,
@@ -31,6 +32,7 @@ const CreateListService = async (
     const validatedInput = CreateListInputSchema.parse(createListInput);
     const { title, boardId, status, position } = validatedInput;
 
+    let listId = new mongoose.Types.ObjectId();
     await session.withTransaction(async () => {
       // 2. Verify that the board exists with the user as owner or is a board member
       const userOwnsBoard = await Board.findOne({
@@ -90,6 +92,7 @@ const CreateListService = async (
       });
 
       const createdList = await newList.save({ session });
+      listId = createdList._id;
 
       // 5. Add the list to the board
       await Board.updateOne(
@@ -114,6 +117,14 @@ const CreateListService = async (
 
     // Return the result from the transaction
     if (result) {
+      // Produce activity log for creating list
+      await produceActivity({
+        userId,
+        activityType: "create",
+        object: "List",
+        objectId: listId.toString(),
+      });
+      console.log(`Activity log produced for list creation: ${listId.toString()}`);
       return result;
     } else {
       throw new Error("Transaction completed but no result was set");

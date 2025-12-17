@@ -3,7 +3,7 @@
 1. Get and validate the comment ID and updateData
 2. Verify that the user owns the comment
 3. Update the comment
-3. Send the updated comment for the task to the user
+4. Send the updated comment for the task to the user
 */
 
 import { MongooseError, Types } from "mongoose";
@@ -14,6 +14,7 @@ import {
 } from "../../types/comment.type.js";
 import Comment from "../../models/comment.model.js";
 import { ZodError } from "zod";
+import { produceActivity } from "../../redis/activity.producer.js";
 
 const UpdateCommentService = async (
   userId: string,
@@ -69,6 +70,16 @@ const UpdateCommentService = async (
       };
     }
 
+    // Produce activity log for updating comment
+    await produceActivity({
+      userId,
+      activityType: "edit",
+      object: "Comment",
+      objectId: comment,
+    });
+    console.log(`Activity log produced for comment update: ${comment}`);
+
+    // 4. Send the updated comment for the task to the user
     return {
       success: true,
       message: "Comment updated successfully",

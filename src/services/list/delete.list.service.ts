@@ -4,10 +4,12 @@
 2. Verify that the user owns the list or is a board member
 3. Get the IDs of all the tasks from within the list
 4. Delete all the comments of each task from the collection
-6. Delete the tasks from the collection
-7. Remove the list from the board
-8. Delete the list from the collection
-9. Send the report to the client
+5. Delete the tasks from the collection
+6. Remove the list from the board
+7. Delete the list from the collection
+8. Send the report to the client
+9. Produce activity log
+10. Handle errors and end the session
 */
 
 import { startSession, Types } from "mongoose";
@@ -18,6 +20,7 @@ import Task from "../../models/task.model.js";
 import GetBoardId from "../../utils/get.boardId.util.js";
 import BoardMember from "../../models/boardMember.model.js";
 import Comment from "../../models/comment.model.js";
+import { produceActivity } from "../../redis/activity.producer.js";
 
 const DeleteListService = async (
   userId: string,
@@ -94,14 +97,14 @@ const DeleteListService = async (
           .exec();
       }
 
-      // 5. Remove the list from the board
+      // 6. Remove the list from the board
       await Board.findByIdAndUpdate(boardId, {
         $pull: { lists: listId },
       })
         .session(session)
         .exec();
 
-      // 6. Delete the list from the collection
+      // 7. Delete the list from the collection
       const { deletedCount } = await List.deleteOne({ _id: listId })
         .session(session)
         .exec();
@@ -109,7 +112,7 @@ const DeleteListService = async (
         throw new Error("Error while deleting the list");
       }
 
-      // 7. Send the report to the client
+      // 8. Send the report to the client
       const tasks = tasksIDs.map((task) => task._id.toString());
 
       result = {
@@ -128,6 +131,14 @@ const DeleteListService = async (
     });
 
     if (result) {
+      // 9. Produce activity log
+      await produceActivity({
+        userId,
+        activityType: "delete",
+        object: "List",
+        objectId: listId,
+      });
+      console.log(`Activity log produced for list deletion: ${listId}`);
       return result;
     } else {
       throw new Error("List deleted successfully but returned nothing");

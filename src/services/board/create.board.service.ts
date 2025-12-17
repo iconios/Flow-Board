@@ -4,7 +4,8 @@ Plan:
 2. Validate the details
 3. Get the User id that created the board
 4. Save the board details while associating with the user id
-5. Return the status message to the caller
+5. Create activity log for board creation
+6. Return the status message to the caller
 */
 
 import { ZodError } from "zod";
@@ -15,6 +16,8 @@ import {
 import User from "../../models/user.model.js";
 import Board from "../../models/board.model.js";
 import { MongooseError, Types } from "mongoose";
+import { produceActivity } from "../../redis/activity.producer.js";
+import { ActivityObjectType, ActivityType } from "../../types/activity.type.js";
 
 const CreateBoardService = async (
   // 1. Accept the board details
@@ -44,7 +47,16 @@ const CreateBoardService = async (
     const newBoard = new Board(validatedInput);
     const board = await newBoard.save();
 
-    // 5. Return the status message to the caller
+    // 5. Create activity log for board creation
+    await produceActivity({
+      userId: id,
+      activityType: ActivityType.enum.create,
+      object: ActivityObjectType.enum.Board,
+      objectId: board._id.toString(),
+    });
+    console.log(`Activity log produced for task creation: ${board._id.toString()}`);
+
+    // 6. Return the status message to the caller
     return {
       success: true,
       message: "Board created successfully",

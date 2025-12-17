@@ -16,6 +16,7 @@ import {
   type UpdateBoardInputType,
 } from "../../types/board.type.js";
 import { ZodError } from "zod";
+import { produceActivity } from "../../redis/activity.producer.js";
 
 const UpdateBoardService = async (
   board_id: string,
@@ -77,6 +78,16 @@ const UpdateBoardService = async (
         message: "Failed to update board",
       };
     }
+
+    // Create activity log for board update
+    await produceActivity({
+      userId,
+      activityType: "edit",
+      object: "Board",
+      objectId: boardId,
+    });
+    console.log(`Activity log produced for task creation: ${boardId}`);
+    
 
     // 5. Send the status to the client
     return {

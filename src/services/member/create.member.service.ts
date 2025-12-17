@@ -8,7 +8,8 @@ Plan:
 6. Get the details of the board owner
 7. Create the member
 8. Send board invite to the user
-9. Send op status to the client
+9. Produce activity log
+10. Send op status to the client
 */
 
 import { ZodError } from "zod";
@@ -23,6 +24,7 @@ import { MongooseError, Types } from "mongoose";
 import Board from "../../models/board.model.js";
 import User from "../../models/user.model.js";
 import { sendMemberInvite } from "../../utils/emails/member.invite.email.js";
+import { produceActivity } from "../../redis/activity.producer.js";
 
 const CreateMemberService = async (
   boardOwner: string,
@@ -151,7 +153,18 @@ const CreateMemberService = async (
       boardOwnerDetails.firstname,
     );
 
-    // 9. Send op status to the client
+    // 9. Produce activity log
+    await produceActivity({
+      userId: ownerId,
+      activityType: "create",
+      object: "Member",
+      objectId: createdMember._id.toString(),
+    });
+    console.log(
+      `Activity log produced for member creation: ${createdMember._id.toString()}`,
+    );
+
+    // 10. Send op status to the client
     return {
       success: true,
       message:

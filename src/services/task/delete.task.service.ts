@@ -5,7 +5,8 @@
 3. Remove the task id from its associated list
 4. Delete the task
 5. Delete the comments for the task
-6. Send the deleted task data to user
+6. Produce activity log
+7. Send the deleted task data to user
 */
 
 import mongoose, { MongooseError, Types } from "mongoose";
@@ -15,6 +16,7 @@ import type { DeleteTaskOutputType } from "../../types/task.type.js";
 import BoardMember from "../../models/boardMember.model.js";
 import GetBoardId from "../../utils/get.boardId.util.js";
 import Comment from "../../models/comment.model.js";
+import { produceActivity } from "../../redis/activity.producer.js";
 
 const DeleteTaskService = async (
   userId: string,
@@ -90,7 +92,6 @@ const DeleteTaskService = async (
       // 5. Delete the comments for the task
       await Comment.deleteMany({ taskId: task }).session(session);
 
-      // 6. Send the deleted task data to user
       result = {
         success: true,
         message: "Task deleted successfully",
@@ -109,6 +110,17 @@ const DeleteTaskService = async (
     if (!result) {
       throw new Error("Task deletion completed but returned nothing");
     }
+
+    // 6. Produce activity log
+    await produceActivity({
+      userId,
+      activityType: "delete",
+      object: "Task",
+      objectId: taskId,
+    });
+    console.log(`Activity log produced for task deletion: ${taskId}`);
+
+    // 7. Send the deleted task data to user
     return result;
   } catch (error) {
     console.error("Error deleting the task", error);

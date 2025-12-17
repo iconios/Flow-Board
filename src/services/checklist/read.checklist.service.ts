@@ -287,10 +287,10 @@ const ReadChecklistService = async (
     // Handle all other errors
     return {
       success: false,
-      message: "Internal server error",
+      message: "Unknown error occurred",
       data: [],
       error: {
-        code: "INTERNAL_ERROR",
+        code: "UNKNOWN_ERROR",
         details:
           process.env.NODE_ENV === "development"
             ? (error as Error).message

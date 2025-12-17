@@ -10,14 +10,18 @@ import User from "../../models/user.model.js";
 import { MongooseError, Types } from "mongoose";
 import {
   ReadActivityInputSchema,
+  type PopulatedUserType,
   type ReadActivityInputType,
   type ReadActivityOutputType,
 } from "../../types/activity.type.js";
 import Board from "../../models/board.model.js";
 import List from "../../models/list.model.js";
+import { ZodError } from "zod";
 
 const ReadActivityService = async (
   userId: string,
+  limit: number,
+  skip: number,
   activityData: ReadActivityInputType,
 ): Promise<ReadActivityOutputType> => {
   try {
@@ -42,42 +46,52 @@ const ReadActivityService = async (
       };
     }
 
-    if (object === "Board") {
-      const boardExists = await Board.findOne({
-        _id: objectId,
-        user_id: userId,
-      });
-      if (!boardExists) {
-        return {
-          success: false,
-          message: "Board does not exist",
-        };
-      }
-    }
+    // if (object === "Board") {
+    //   const boardExists = await Board.findOne({
+    //     _id: objectId,
+    //     user_id: userId,
+    //   });
+    //   if (!boardExists) {
+    //     return {
+    //       success: false,
+    //       message: "Board does not exist",
+    //     };
+    //   }
+    // }
 
-    if (object === "Task") {
-      const taskList = await List.findOne({ tasks: objectId, userId })
-        .select("_id")
-        .exec();
-      if (!taskList) {
-        return {
-          success: false,
-          message: "Task does not exist",
-        };
-      }
-    }
+    // if (object === "Task") {
+    //   const taskList = await List.findOne({ tasks: objectId, userId })
+    //     .select("_id")
+    //     .exec();
+    //   if (!taskList) {
+    //     return {
+    //       success: false,
+    //       message: "Task does not exist",
+    //     };
+    //   }
+    // }
 
     // 3. Send the activity logs to the user
     const userActivity = await Activity.find({
-      userId,
       object,
       objectId,
-    }).exec();
+    })
+      .limit(limit)
+      .skip(skip)
+      .populate<{ userId: PopulatedUserType }>("userId", "_id name email")
+      .sort({ createdAt: -1 })
+      .exec();
+
     const userActivityToReturn = userActivity.map((activity) => ({
       activityType: activity.activityType,
       object: activity.object,
       objectId: activity.objectId.toString(),
       createdAt: activity.createdAt.toISOString(),
+      user: {
+        id: activity.userId._id.toString(),
+        name: activity.userId.name,
+        email: activity.userId.email,
+      },
     }));
 
     return {
@@ -90,8 +104,28 @@ const ReadActivityService = async (
     };
   } catch (error) {
     console.error("Error reading activity log", error);
+    if (error instanceof ZodError) {
+      return {
+        success: false,
+        message: "Error validating activity data",
+      };
+    }
 
     if (error instanceof MongooseError) {
+      if (error.name === "CastError") {
+        return {
+          success: false,
+          message: "Invalid ID format",
+        };
+      }
+
+      if (error.name === "ValidationError") {
+        return {
+          success: false,
+          message: "Validation error",
+        };
+      }
+
       return {
         success: false,
         message: "Error while fetching activity logs ",

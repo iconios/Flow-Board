@@ -78,16 +78,18 @@ export type CreateChecklistInputType = z.infer<
 const CreateChecklistResponseSchema = z.object({
   success: z.boolean(),
   message: z.string(),
-  data: z.object({
-    id: z.string(),
-    taskId: z.string(),
-    userId: z.string(),
-    boardId: z.string(),
-    content: z.string(),
-    checked: z.boolean(),
-    createdAt: z.string(),
-    updatedAt: z.string(),
-  }).or(z.object({})),
+  data: z
+    .object({
+      id: z.string(),
+      taskId: z.string(),
+      userId: z.string(),
+      boardId: z.string(),
+      content: z.string(),
+      checked: z.boolean(),
+      createdAt: z.string(),
+      updatedAt: z.string(),
+    })
+    .or(z.object({})),
   error: z
     .object({
       code: z.string(),

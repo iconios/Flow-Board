@@ -3,7 +3,8 @@
 1. Receive and validate list ID, board ID and the update details
 2. Verify that the list is owned by the user or the user is a board member
 3. Update the list accordingly
-4. Send the op update to client
+4. Produce activity log for editing list
+5. Send the op update to client
 */
 
 import List from "../../models/list.model.js";
@@ -16,6 +17,7 @@ import { MongooseError, Types } from "mongoose";
 import { ZodError } from "zod";
 import GetBoardId from "../../utils/get.boardId.util.js";
 import BoardMember from "../../models/boardMember.model.js";
+import { produceActivity } from "../../redis/activity.producer.js";
 
 const UpdateListService = async (
   list: string,
@@ -86,9 +88,17 @@ const UpdateListService = async (
       };
     }
 
-    // 4. Send the op update to client
-    const tasks = updatedList.tasks?.map((task) => task._id.toString());
+    // 4. Produce activity log for editing list
+    await produceActivity({
+      userId,
+      activityType: "edit",
+      object: "List",
+      objectId: listId,
+    });
+    console.log(`Activity log produced for list editing: ${listId}`);
 
+    // 5. Send the op update to client
+    const tasks = updatedList.tasks?.map((task) => task._id.toString());
     return {
       success: true,
       message: "List updated successfully",

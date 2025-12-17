@@ -16,6 +16,7 @@ import Board from "../../models/board.model.js";
 import BoardMember from "../../models/boardMember.model.js";
 import Task from "../../models/task.model.js";
 import Checklist from "../../models/checklist.model.js";
+import { produceActivity } from "../../redis/activity.producer.js";
 
 const CreateChecklistService = async (
   createChecklistInput: CreateChecklistInputType,
@@ -146,6 +147,15 @@ const CreateChecklistService = async (
         },
       };
     }
+
+    // Create activity log for checklist creation
+    await produceActivity({
+      activityType: "create",
+      object: "Checklist",
+      objectId: createdChecklist._id.toString(),
+      userId,
+    });
+    console.log(`Activity log produced for checklist creation: ${createdChecklist._id.toString()}`);
 
     return {
       success: true,

@@ -14,7 +14,7 @@ const ActivitySchema = new mongoose.Schema({
   },
   object: {
     type: String,
-    enum: ["Board", "Task"],
+    enum: ["Board", "Task", "Comment", "Checklist", "List"],
     required: true,
   },
   objectId: {
@@ -25,7 +25,7 @@ const ActivitySchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: new Date(Date.now()),
+    default: Date.now,
     immutable: true,
   },
 });

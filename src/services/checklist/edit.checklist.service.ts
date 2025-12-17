@@ -11,6 +11,7 @@ import type { EditChecklistInputType } from "../../types/checklist.type.js";
 import Checklist from "../../models/checklist.model.js";
 import Board from "../../models/board.model.js";
 import BoardMember from "../../models/boardMember.model.js";
+import { produceActivity } from "../../redis/activity.producer.js";
 
 const EditChecklistService = async ({
   checklistId,
@@ -130,6 +131,15 @@ const EditChecklistService = async ({
       },
       { new: true, runValidators: true },
     ).exec();
+
+    // Produce activity log for editing checklist
+    await produceActivity({
+      userId,
+      activityType: "edit",
+      object: "Checklist",
+      objectId: checklistId,
+    });
+    console.log(`Activity log produced for checklist editing: ${checklistId}`);
 
     return {
       success: true,

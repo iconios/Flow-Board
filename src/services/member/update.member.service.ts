@@ -4,7 +4,8 @@
 1. Get the owner id and member id and validate them
 2. Verify that the owner owns the board
 3. Verify that the board id exist for the member and Update the member role
-4. Send op status to client
+4. Produce activity log
+5. Send op status to client
 */
 
 import { MongooseError, Types } from "mongoose";
@@ -16,6 +17,7 @@ import {
 import { ZodError } from "zod";
 import Board from "../../models/board.model.js";
 import BoardMember from "../../models/boardMember.model.js";
+import { produceActivity } from "../../redis/activity.producer.js";
 
 const UpdateMemberRoleService = async (
   ownerId: string,
@@ -98,7 +100,16 @@ const UpdateMemberRoleService = async (
       };
     }
 
-    // 4. Send op status to client
+    // 4. Produce activity log
+    await produceActivity({
+      userId: ownerId,
+      activityType: "edit",
+      object: "Member",
+      objectId: memberId,
+    });
+    console.log(`Activity log produced for member role update: ${memberId}`);
+
+    // 5. Send op status to client
     return {
       success: true,
       message: "Update successful",

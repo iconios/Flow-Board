@@ -31,7 +31,7 @@ BoardRouter.post("/", TokenExtraction, async (req: Request, res: Response) => {
 
     res.status(201).json(result);
   } catch (error) {
-    console.error("Unknow error while creating board", error);
+    console.error("Unknown error while creating board", error);
 
     return res.status(500).json({
       success: false,

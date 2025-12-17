@@ -7,6 +7,7 @@
 
 import { MongooseError, Types } from "mongoose";
 import Comment from "../../models/comment.model.js";
+import { produceActivity } from "../../redis/activity.producer.js";
 
 const DeleteCommentService = async (userId: string, commentId: string) => {
   try {
@@ -30,6 +31,15 @@ const DeleteCommentService = async (userId: string, commentId: string) => {
         message: "Comment not found",
       };
     }
+
+    // Produce activity log for deleting comment
+    await produceActivity({
+      userId,
+      activityType: "delete",
+      object: "Comment",
+      objectId: trimmedCommentId,
+    });
+    console.log(`Activity log produced for comment deletion: ${trimmedCommentId}`);
 
     // 3. Send the status of the deleted comment to user
     return {

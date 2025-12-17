@@ -3,7 +3,8 @@
 1. Get and validate the task data, board ID and user ID
 2. Verify that the user owns the list or is a board member
 3. Create the task and add the task id to the list's tasks array
-4. Send the details of the new task to the client
+4. Produce activity log
+5. Send the details of the new task to the client
 */
 
 import mongoose, { MongooseError, Types } from "mongoose";
@@ -17,6 +18,7 @@ import Task from "../../models/task.model.js";
 import List from "../../models/list.model.js";
 import GetBoardId from "../../utils/get.boardId.util.js";
 import BoardMember from "../../models/boardMember.model.js";
+import { produceActivity } from "../../redis/activity.producer.js";
 
 const CreateTaskService = async (
   userId: string,
@@ -24,6 +26,7 @@ const CreateTaskService = async (
 ): Promise<CreateTaskOutputType> => {
   // 1. Get and validate the task data, board ID and user ID
   let listId;
+  let taskId: string = "";
   let validatedInput: CreateTaskInputType;
   try {
     validatedInput = CreateTaskInputSchema.parse(createTaskData);
@@ -101,7 +104,7 @@ const CreateTaskService = async (
         throw new Error("Error while creating task");
       }
 
-      // 4. Send the details of the new task to the client
+      taskId = taskCreated._id.toString();
       result = {
         success: true,
         message: "Task created successfully",
@@ -121,6 +124,18 @@ const CreateTaskService = async (
       throw new Error("Task created successfully but returned nothing");
     }
 
+    // 4. Produce activity log
+    if (result && taskId) {
+      await produceActivity({
+        userId,
+        activityType: "create",
+        object: "Task",
+        objectId: taskId,
+      });
+      console.log(`Activity log produced for task creation: ${taskId}`);
+    }
+
+    // 5. Send the details of the new task to the client
     return result;
   } catch (error) {
     console.error("Error while creating task", error);

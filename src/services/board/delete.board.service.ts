@@ -21,6 +21,8 @@ import List from "../../models/list.model.js";
 import Task from "../../models/task.model.js";
 import Comment from "../../models/comment.model.js";
 import BoardMember from "../../models/boardMember.model.js";
+import { produceActivity } from "../../redis/activity.producer.js";
+import { ActivityObjectType, ActivityType } from "../../types/activity.type.js";
 
 const DeleteBoardService = async (
   boardId: string,
@@ -122,6 +124,15 @@ const DeleteBoardService = async (
         message: "Board already deleted or not found",
       };
     }
+
+    // Create activity log for board deletion
+    await produceActivity({
+      userId: userObjId.toString(),
+      activityType: ActivityType.enum.delete,
+      object: ActivityObjectType.enum.Board,
+      objectId: boardObjId.toString(),
+    });
+    console.log(`Activity log produced for task creation: ${boardObjId.toString()}`);
 
     return {
       success: true,

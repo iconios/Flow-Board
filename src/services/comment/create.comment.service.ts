@@ -16,6 +16,7 @@ import List from "../../models/list.model.js";
 import Comment from "../../models/comment.model.js";
 import { ZodError } from "zod";
 import BoardMember from "../../models/boardMember.model.js";
+import { produceActivity } from "../../redis/activity.producer.js";
 
 const CreateCommentService = async (
   userId: string,
@@ -60,6 +61,15 @@ const CreateCommentService = async (
     });
 
     const commentCreated = await newComment.save();
+
+    // Produce activity log for creating comment
+    await produceActivity({
+      userId,
+      activityType: "create",
+      object: "Comment",
+      objectId: commentCreated._id.toString(),
+    });
+    console.log(`Activity log produced for comment creation: ${commentCreated._id.toString()}`);
 
     // 4. Send the details of the created comment to user
     return {

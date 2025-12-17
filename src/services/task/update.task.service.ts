@@ -8,7 +8,8 @@
   3c. Remove the task Id from its current list
   3d. Add the task Id to the new list
 4. Update the task
-5. Send the updated task to the user
+5. Produce activity log
+6. Send the updated task to the user
 */
 
 import { MongooseError, startSession, Types } from "mongoose";
@@ -22,6 +23,8 @@ import Task from "../../models/task.model.js";
 import { ZodError } from "zod";
 import GetBoardId from "../../utils/get.boardId.util.js";
 import BoardMember from "../../models/boardMember.model.js";
+import { produceActivity } from "../../redis/activity.producer.js";
+import { ActivityType } from "../../types/activity.type.js";
 
 const UpdateTaskService = async (
   userId: string,
@@ -205,7 +208,7 @@ const UpdateTaskService = async (
       }
     }
 
-    // Update the task
+    // 4. Update the task
     const { listId: _ignore, ...restNoMove } = validatedInput;
     const updatedTask = await Task.findByIdAndUpdate(task, restNoMove, {
       new: true,
@@ -218,7 +221,16 @@ const UpdateTaskService = async (
       };
     }
 
-    // 4. Send the updated task to the user
+    // 5. Produce activity log
+    await produceActivity({
+      userId,
+      activityType: ActivityType.enum.edit,
+      object: "Task",
+      objectId: taskId,
+    });
+    console.log(`Activity log produced for task update: ${taskId}`);
+
+    // 6. Send the updated task to the user
     return {
       success: true,
       message: "Task updated successfully",

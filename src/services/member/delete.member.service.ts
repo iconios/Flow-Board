@@ -5,7 +5,8 @@
 3. Get the board title, board owner name, member name, member email
 4. Remove the member from the board
 5. Send a membership revocation email to member
-6. Send op status to client
+6. Produce activity log
+7. Send op status to client
 */
 
 import Board from "../../models/board.model.js";
@@ -16,6 +17,7 @@ import type {
   PopulatedMemberUserIdType,
 } from "../../types/member.type.js";
 import { sendMembershipRemovalEmail } from "../../utils/emails/member.removal.email.js";
+import { produceActivity } from "../../redis/activity.producer.js";
 
 const DeleteMemberService = async (ownerId: string, memberId: string) => {
   try {
@@ -85,7 +87,16 @@ const DeleteMemberService = async (ownerId: string, memberId: string) => {
       memberEmail,
     });
 
-    // 6. Send op status to client
+    // 6. Produce activity log
+    await produceActivity({
+      userId: ownerId,
+      activityType: "delete",
+      object: "Member",
+      objectId: memberId,
+    });
+    console.log(`Activity log produced for member removal: ${memberId}`);
+
+    // 7. Send op status to client
     return {
       success: true,
       message: "Board member successfully deleted",
