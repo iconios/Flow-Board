@@ -1,14 +1,14 @@
 import { transporter } from "../mailer.util.js";
 // Password reset Email Function
 const sendPasswordResetEmail = async (email, firstname, resetPasswordToken) => {
-  const resetPasswordUrl = `${process.env.BASE_URL}/auth/reset-password?token=${resetPasswordToken}`;
-  const fromAddress = `"${process.env.APP_NAME}" <${process.env.MAIL_FROM}>`;
-  const mailOptions = {
-    From: fromAddress,
-    To: email,
-    Subject: "Please Reset your Password",
-    MessageStream: "outbound",
-    HtmlBody: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    const resetPasswordUrl = `${process.env.BASE_URL}/auth/reset-password?token=${resetPasswordToken}`;
+    const fromAddress = `"${process.env.APP_NAME}" <${process.env.MAIL_FROM}>`;
+    const mailOptions = {
+        From: fromAddress,
+        To: email,
+        Subject: "Please Reset your Password",
+        MessageStream: "outbound",
+        HtmlBody: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2>Password Reset</h2>
         <p>Hello ${firstname},</p>
         <p>You requested to reset your password. Click the button below to proceed:</p>
@@ -22,14 +22,15 @@ const sendPasswordResetEmail = async (email, firstname, resetPasswordToken) => {
         <p>This link will expire in 30 minutes.</p>
         <p>If you didn't request this, please ignore this email.</p>
       </div>`,
-  };
-  // Send password reset email
-  try {
-    await transporter.sendEmail(mailOptions);
-    console.log("Password reset email sent to", email);
-  } catch (error) {
-    console.log("Error sending password reset email", error);
-  }
+    };
+    // Send password reset email
+    try {
+        await transporter.sendEmail(mailOptions);
+        console.log("Password reset email sent to", email);
+    }
+    catch (error) {
+        console.log("Error sending password reset email", error);
+    }
 };
 export { sendPasswordResetEmail };
 //# sourceMappingURL=password.reset.email.js.map

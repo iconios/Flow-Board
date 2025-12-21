@@ -7,7 +7,7 @@ import { createSocketServer } from "./socket.js";
 import { verifyMailer } from "./utils/mailer.util.js";
 dotenv.config({ quiet: true });
 if (process.env.NODE_ENV !== "test") {
-  await verifyMailer();
+    await verifyMailer();
 }
 const app = createApp();
 const server = createServer(app);
@@ -16,10 +16,10 @@ createSocketServer(server);
 const PORT = Number(process.env.PORT) || 8000;
 // Connect DB only outside tests
 if (process.env.NODE_ENV !== "test") {
-  dbConnect().catch(console.dir);
-  server.listen(PORT, () => {
-    console.log("Server running on Port", PORT);
-  });
+    await dbConnect().catch(console.dir);
+    server.listen(PORT, () => {
+        console.log("Server running on Port", PORT);
+    });
 }
 export { app, server };
 export default app;

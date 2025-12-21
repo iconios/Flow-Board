@@ -1,1 +1,1 @@
-{"version":3,"file":"member.invite.email.d.ts","sourceRoot":"","sources":["../../../src/utils/emails/member.invite.email.ts"],"names":[],"mappings":"AAGA,QAAA,MAAM,gBAAgB,GACpB,OAAO,MAAM,EACb,WAAW,MAAM,EACjB,mBAAmB,MAAM,EACzB,YAAY,MAAM,kBAiInB,CAAC;AAEF,OAAO,EACH,gBAAgB,GACnB,CAAA"}
+{"version":3,"file":"member.invite.email.d.ts","sourceRoot":"","sources":["../../../src/utils/emails/member.invite.email.ts"],"names":[],"mappings":"AAGA,QAAA,MAAM,gBAAgB,GACpB,OAAO,MAAM,EACb,WAAW,MAAM,EACjB,mBAAmB,MAAM,EACzB,YAAY,MAAM,kBAiInB,CAAC;AAEF,OAAO,EAAE,gBAAgB,EAAE,CAAC"}

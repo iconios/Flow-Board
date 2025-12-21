@@ -5,47 +5,56 @@
 3. Get the response from the List Update Service
 4. Broadcast result to all room members
 */
-import { TaskMoveInputSchema } from "./types/task.type.js";
+import { TaskMoveInputSchema, } from "./types/task.type.js";
 import UpdateTaskService from "./services/task/update.task.service.js";
 import { ZodError } from "zod";
+import { produceActivity } from "./redis/activity.producer.js";
 const TaskMoveUtility = async (socket, payload) => {
-  // 1. Get and validate the task move parameters - userId, taskId, listId
-  const userId = socket.data?.userId;
-  try {
-    console.log("Task move data received", {
-      payload,
-    });
-    const { data } = TaskMoveInputSchema.parse(payload);
-    const { taskId, listId } = data;
-    // 2. Call the Update Task Service with the parameters
-    const result = await UpdateTaskService(userId, taskId, { listId });
-    // 3. Get the response from the List Update Service
-    if (!result.success) {
-      socket.emit("task:move:error", {
-        message: result.message || "Failed to move task",
-      });
-      return;
+    // 1. Get and validate the task move parameters - userId, taskId, listId
+    const userId = socket.data?.userId;
+    try {
+        console.log("Task move data received", {
+            payload,
+        });
+        const { data } = TaskMoveInputSchema.parse(payload);
+        const { taskId, listId } = data;
+        // 2. Call the Update Task Service with the parameters
+        const result = await UpdateTaskService(userId, taskId, { listId });
+        // 3. Get the response from the List Update Service
+        if (!result.success) {
+            socket.emit("task:move:error", {
+                message: result.message || "Failed to move task",
+            });
+            return;
+        }
+        // 4. Broadcast result to all room members
+        const roomName = `listId-${listId}`;
+        socket.to(roomName).emit("task:move:success", {
+            message: `Task ${taskId} moved successfully`,
+            data: result.task,
+        });
+        // Log activity
+        await produceActivity({
+            userId,
+            activityType: "move",
+            object: "Task",
+            objectId: taskId,
+        });
+        console.log(`Activity log produced for task move: ${taskId}`);
     }
-    // 4. Broadcast result to all room members
-    const roomName = `listId-${listId}`;
-    socket.to(roomName).emit("task:move:success", {
-      message: `Task ${taskId} moved successfully`,
-      data: result.task,
-    });
-  } catch (error) {
-    console.error("Error moving task", error);
-    if (error instanceof ZodError) {
-      socket.emit("task:move:error", {
-        message: "Error validating task move data",
-      });
-      return;
+    catch (error) {
+        console.error("Error moving task", error);
+        if (error instanceof ZodError) {
+            socket.emit("task:move:error", {
+                message: "Error validating task move data",
+            });
+            return;
+        }
+        const errorMessage = error instanceof Error ? `${error.message}` : "Error moving task";
+        socket.emit("task:move:error", {
+            message: errorMessage,
+        });
     }
-    const errorMessage =
-      error instanceof Error ? `${error.message}` : "Error moving task";
-    socket.emit("task:move:error", {
-      message: errorMessage,
-    });
-  }
 };
 export default TaskMoveUtility;
 //# sourceMappingURL=task.move.utility.js.map

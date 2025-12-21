@@ -1,1 +1,1 @@
-{"version":3,"file":"member.removal.email.d.ts","sourceRoot":"","sources":["../../../src/utils/emails/member.removal.email.ts"],"names":[],"mappings":"AAGA,QAAA,MAAM,0BAA0B,GAC9B,kBAAkB,MAAM,EACxB,gBAAgB,MAAM,EACtB,iBAAiB,MAAM,EACvB,YAAY,MAAM,kBAmEnB,CAAC;AAEF,OAAO,EACH,0BAA0B,EAC7B,CAAA"}
+{"version":3,"file":"member.removal.email.d.ts","sourceRoot":"","sources":["../../../src/utils/emails/member.removal.email.ts"],"names":[],"mappings":"AAGA,QAAA,MAAM,0BAA0B,GAC9B,kBAAkB,MAAM,EACxB,gBAAgB,MAAM,EACtB,iBAAiB,MAAM,EACvB,YAAY,MAAM,kBAmEnB,CAAC;AAEF,OAAO,EAAE,0BAA0B,EAAE,CAAC"}

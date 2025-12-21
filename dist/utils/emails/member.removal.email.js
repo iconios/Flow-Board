@@ -1,18 +1,13 @@
 import { transporter } from "../mailer.util.js";
 // Send Board Membership Removal Email Function
-const sendMembershipRemovalEmail = async (
-  boardMemberEmail,
-  boardOwnerName,
-  boardMemberName,
-  boardTitle,
-) => {
-  const fromAddress = `"${process.env.APP_NAME}" <${process.env.MAIL_FROM}>`;
-  const mailOptions = {
-    From: fromAddress,
-    To: boardMemberEmail,
-    Subject: "Board Membership Update",
-    MessageStream: "outbound",
-    HtmlBody: `<!DOCTYPE html>
+const sendMembershipRemovalEmail = async (boardMemberEmail, boardOwnerName, boardMemberName, boardTitle) => {
+    const fromAddress = `"${process.env.APP_NAME}" <${process.env.MAIL_FROM}>`;
+    const mailOptions = {
+        From: fromAddress,
+        To: boardMemberEmail,
+        Subject: "Board Membership Update",
+        MessageStream: "outbound",
+        HtmlBody: `<!DOCTYPE html>
             <html lang="en">
             <head>
                 <meta charset="UTF-8">
@@ -62,14 +57,15 @@ const sendMembershipRemovalEmail = async (
                 </table>
             </body>
             </html>`,
-  };
-  // Send board membership revocation email
-  try {
-    await transporter.sendEmail(mailOptions);
-    console.log("Board membership revocation email sent to", boardMemberEmail);
-  } catch (error) {
-    console.log("Error sending board membership invitation email", error);
-  }
+    };
+    // Send board membership revocation email
+    try {
+        await transporter.sendEmail(mailOptions);
+        console.log("Board membership revocation email sent to", boardMemberEmail);
+    }
+    catch (error) {
+        console.log("Error sending board membership invitation email", error);
+    }
 };
 export { sendMembershipRemovalEmail };
 //# sourceMappingURL=member.removal.email.js.map

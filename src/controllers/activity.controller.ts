@@ -26,8 +26,8 @@ ActivityRouter.get(
       }
 
       // 2. Get the activityData
-      const { object, objectId } = req.query;
-      if (!object || !objectId) {
+      const { object, objectId, limit, skip } = req.query;
+      if (!object || !objectId || !limit || !skip) {
         return res.status(400).json({
           success: false,
           message: "Missing required parameters",
@@ -43,16 +43,32 @@ ActivityRouter.get(
         return res.status(400).json({
           success: false,
           message: "Invalid query types",
+          metadata: {
+            objectId,
+            object,
+            timestamp: new Date().toISOString(),
+          }
         });
       }
 
+      if (typeof limit !== "number" || typeof skip !== "number") {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid query types",
+          metadata: {
+            skip,
+            limit,
+            timestamp: new Date().toISOString(),
+          }
+        });
+      }
       const activityData = {
         object: object as "Board" | "Task",
         objectId: objectId,
       };
 
       // 3. Call and return the result of the ReadActivityService
-      const result = await ReadActivityService(userId, activityData);
+      const result = await ReadActivityService(userId, limit, skip, activityData);
       if (!result.success) {
         return res.status(400).json({
           success: false,

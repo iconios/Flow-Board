@@ -1,10 +1,10 @@
 import { z } from "zod";
 export const RoomIdSchema = z
-  .object({
+    .object({
     entity: z.enum(["listId", "taskId", "commentId"]),
     entityId: z.string(),
-  })
-  .strict();
+})
+    .strict();
 export const RoomIdEntitySchema = z.enum(["listId", "taskId", "commentId"]);
 export const RoomIdEntityIdSchema = z.string();
 //# sourceMappingURL=socket.io.type.js.map
