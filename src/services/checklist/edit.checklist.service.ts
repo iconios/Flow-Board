@@ -7,48 +7,34 @@
 */
 
 import { MongooseError, Types } from "mongoose";
-import type { EditChecklistInputType } from "../../types/checklist.type.js";
+import {
+  EditChecklistInputSchema,
+  type EditChecklistInputType,
+  type EditChecklistResponseType,
+} from "../../types/checklist.type.js";
 import Checklist from "../../models/checklist.model.js";
 import Board from "../../models/board.model.js";
 import BoardMember from "../../models/boardMember.model.js";
 import { produceActivity } from "../../redis/activity.producer.js";
+import { ZodError } from "zod";
 
-const EditChecklistService = async ({
-  checklistId,
-  userId,
-  content,
-}: EditChecklistInputType) => {
+const EditChecklistService = async (
+  userId: string,
+  editChecklistInput: EditChecklistInputType,
+): Promise<EditChecklistResponseType> => {
   try {
     // 1. Get and validate the checklist ID, board-owner ID, and board-member ID
-    if (!checklistId?.trim() || !userId?.trim() || !content?.trim()) {
+    if (!userId?.trim()) {
       return {
         success: false,
-        message: "Missing parameters",
-        data: [],
+        message: "Missing parameter",
+        data: {},
         error: {
-          code: "MISSING_PARAMETER(S)",
-          details: "Parameters missing",
+          code: "MISSING_PARAMETER",
+          details: "Parameter missing",
         },
         metadata: {
-          timestamp: Date.now(),
-          checklistId,
-          userId,
-        },
-      };
-    }
-
-    if (!Types.ObjectId.isValid(checklistId)) {
-      return {
-        success: false,
-        message: "Invalid checklist ID format",
-        data: [],
-        error: {
-          code: "INVALID_PARAMETER",
-          details: "Invalid checklist ID parameter",
-        },
-        metadata: {
-          timestamp: Date.now(),
-          checklistId,
+          timestamp: new Date().toISOString(),
           userId,
         },
       };
@@ -58,13 +44,31 @@ const EditChecklistService = async ({
       return {
         success: false,
         message: "Invalid user ID format",
-        data: [],
+        data: {},
         error: {
           code: "INVALID_PARAMETER",
           details: "Invalid user ID parameter",
         },
         metadata: {
-          timestamp: Date.now(),
+          timestamp: new Date().toISOString(),
+          userId,
+        },
+      };
+    }
+
+    const { checklistId, ...updateContent } =
+      EditChecklistInputSchema.parse(editChecklistInput);
+    if (!Types.ObjectId.isValid(checklistId)) {
+      return {
+        success: false,
+        message: "Invalid checklist ID format",
+        data: {},
+        error: {
+          code: "INVALID_PARAMETER",
+          details: "Invalid checklist ID parameter",
+        },
+        metadata: {
+          timestamp: new Date().toISOString(),
           checklistId,
           userId,
         },
@@ -80,13 +84,13 @@ const EditChecklistService = async ({
       return {
         success: false,
         message: "Checklist not found",
-        data: [],
+        data: {},
         error: {
           code: "NOT_FOUND",
           details: "Checklist not found",
         },
         metadata: {
-          timestamp: Date.now(),
+          timestamp: new Date().toISOString(),
           checklistId,
           userId,
         },
@@ -110,13 +114,13 @@ const EditChecklistService = async ({
       return {
         success: false,
         message: "Unauthorized access",
-        data: [],
+        data: {},
         error: {
           code: "UNAUTHORIZED",
           details: "Access denied",
         },
         metadata: {
-          timestamp: Date.now(),
+          timestamp: new Date().toISOString(),
           checklistId,
           userId,
         },
@@ -127,36 +131,79 @@ const EditChecklistService = async ({
     const updatedChecklist = await Checklist.findByIdAndUpdate(
       checklistId,
       {
-        content,
+        ...updateContent,
       },
       { new: true, runValidators: true },
     ).exec();
 
+    if (!updatedChecklist) {
+      return {
+        success: false,
+        message: "Checklist not found during update",
+        data: {},
+        error: {
+          code: "NOT_FOUND",
+          details: "Checklist not found during update",
+        },
+        metadata: {
+          timestamp: new Date().toISOString(),
+          checklistId,
+          userId,
+        },
+      };
+    }
+
     // Produce activity log for editing checklist
-    await produceActivity({
+    void produceActivity({
       userId,
       activityType: "edit",
       object: "Checklist",
       objectId: checklistId,
-    });
-    console.log(`Activity log produced for checklist editing: ${checklistId}`);
+    }).catch((err) =>
+      console.error(
+        `Activity log failed for checklist editing: ${checklistId}`,
+        err,
+      ),
+    );
 
     return {
       success: true,
       message: "Checklist updated successfully",
-      data: updatedChecklist,
+      data: {
+        id: updatedChecklist._id.toString(),
+        taskId: updatedChecklist.taskId.toString(),
+        userId: updatedChecklist.userId.toString(),
+        boardId: updatedChecklist.boardId.toString(),
+        content: updatedChecklist.content,
+        checked: updatedChecklist.checked,
+        createdAt: updatedChecklist.createdAt.toISOString(),
+        updatedAt: updatedChecklist.updatedAt.toISOString(),
+      },
       error: null,
       metadata: {
-        timestamp: Date.now(),
+        timestamp: new Date().toISOString(),
         checklistId,
         userId,
       },
     };
   } catch (error) {
-    console.error(
-      `Error updating checklist ${checklistId} for ${userId}`,
-      error,
-    );
+    console.error(`Error updating checklist for ${userId}`, error);
+
+    if (error instanceof ZodError) {
+      return {
+        success: false,
+        message: "Invalid input data",
+        data: {},
+        error: {
+          code: "INVALID_INPUT",
+          details: "Error validating input data",
+        },
+        metadata: {
+          timestamp: new Date().toISOString(),
+          userId,
+        },
+      };
+    }
 
     // Handle specific Mongoose errors
     if (error instanceof MongooseError) {
@@ -164,14 +211,13 @@ const EditChecklistService = async ({
         return {
           success: false,
           message: "Invalid ID format",
-          data: [],
+          data: {},
           error: {
             code: "CAST_ERROR",
             details: "The provided ID format is invalid",
           },
           metadata: {
-            timestamp: Date.now(),
-            checklistId,
+            timestamp: new Date().toISOString(),
             userId,
           },
         };
@@ -181,14 +227,13 @@ const EditChecklistService = async ({
         return {
           success: false,
           message: "Validation error",
-          data: [],
+          data: {},
           error: {
             code: "VALIDATION_ERROR",
             details: "Error validating query parameters",
           },
           metadata: {
-            timestamp: Date.now(),
-            checklistId,
+            timestamp: new Date().toISOString(),
             userId,
           },
         };
@@ -198,7 +243,7 @@ const EditChecklistService = async ({
       return {
         success: false,
         message: "Database error occurred",
-        data: [],
+        data: {},
         error: {
           code: "DATABASE_ERROR",
           details:
@@ -207,8 +252,7 @@ const EditChecklistService = async ({
               : "Error fetching data from database",
         },
         metadata: {
-          timestamp: Date.now(),
-          checklistId,
+          timestamp: new Date().toISOString(),
           userId,
         },
       };
@@ -218,7 +262,7 @@ const EditChecklistService = async ({
     return {
       success: false,
       message: "Internal server error",
-      data: [],
+      data: {},
       error: {
         code: "INTERNAL_ERROR",
         details:
@@ -227,8 +271,7 @@ const EditChecklistService = async ({
             : "An unexpected error occurred",
       },
       metadata: {
-        timestamp: Date.now(),
-        checklistId,
+        timestamp: new Date().toISOString(),
         userId,
       },
     };

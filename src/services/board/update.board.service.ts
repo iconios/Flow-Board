@@ -80,14 +80,17 @@ const UpdateBoardService = async (
     }
 
     // Create activity log for board update
-    await produceActivity({
+    void produceActivity({
       userId,
       activityType: "edit",
       object: "Board",
       objectId: boardId,
-    });
-    console.log(`Activity log produced for task creation: ${boardId}`);
-    
+    }).catch((err) =>
+      console.error(
+        `Activity log failed for board update: ${boardId}`,
+        err,
+      ),
+    );
 
     // 5. Send the status to the client
     return {

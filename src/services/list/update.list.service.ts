@@ -89,13 +89,14 @@ const UpdateListService = async (
     }
 
     // 4. Produce activity log for editing list
-    await produceActivity({
+    void produceActivity({
       userId,
       activityType: "edit",
       object: "List",
       objectId: listId,
-    });
-    console.log(`Activity log produced for list editing: ${listId}`);
+    }).catch((err) =>
+      console.error(`Activity log failed for list editing: ${listId}`, err),
+    );
 
     // 5. Send the op update to client
     const tasks = updatedList.tasks?.map((task) => task._id.toString());

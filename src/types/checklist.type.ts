@@ -1,10 +1,10 @@
 import { z } from "zod";
 
-const EditChecklistInputSchema = z
+export const EditChecklistInputSchema = z
   .object({
     checklistId: z.string(),
-    userId: z.string(),
-    content: z.string(),
+    content: z.string().optional(),
+    checked: z.boolean().optional(),
   })
   .strict();
 
@@ -107,4 +107,59 @@ const CreateChecklistResponseSchema = z.object({
 
 export type CreateChecklistResponseType = z.infer<
   typeof CreateChecklistResponseSchema
+>;
+
+export const EditChecklistResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+  data: z
+    .object({
+      id: z.string(),
+      taskId: z.string(),
+      userId: z.string(),
+      boardId: z.string(),
+      content: z.string(),
+      checked: z.boolean(),
+      createdAt: z.string(),
+      updatedAt: z.string(),
+    })
+    .or(z.object({})),
+  error: z
+    .object({
+      code: z.string(),
+      details: z.string(),
+    })
+    .or(z.null()),
+  metadata: z.object({
+    timestamp: z.string(),
+    taskId: z.string().optional(),
+    userId: z.string().optional(),
+    boardId: z.string().optional(),
+    checklistId: z.string().optional(),
+  }),
+});
+
+export type EditChecklistResponseType = z.infer<
+  typeof EditChecklistResponseSchema
+>;
+
+const DeleteChecklistResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+    data: z.object({}).nullable(),
+    error: z.object({
+        code: z.string(),
+        details: z.string(),
+    }).nullable(),
+    metadata: z.object({
+        timestamp: z.string(),
+        userId: z.string().optional(),
+        checklistId: z.string().optional(),
+        boardId: z.string().optional(),
+        deletedCount: z.number().optional(),
+    })
+});
+
+export type DeleteChecklistResponseType = z.infer<
+  typeof DeleteChecklistResponseSchema
 >;

@@ -63,13 +63,17 @@ const CreateCommentService = async (
     const commentCreated = await newComment.save();
 
     // Produce activity log for creating comment
-    await produceActivity({
+    void produceActivity({
       userId,
       activityType: "create",
       object: "Comment",
       objectId: commentCreated._id.toString(),
-    });
-    console.log(`Activity log produced for comment creation: ${commentCreated._id.toString()}`);
+    }).catch((err) =>
+      console.error(
+        `Activity log failed for comment creation: ${commentCreated._id.toString()}`,
+        err,
+      ),
+    );
 
     // 4. Send the details of the created comment to user
     return {

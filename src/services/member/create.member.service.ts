@@ -154,14 +154,16 @@ const CreateMemberService = async (
     );
 
     // 9. Produce activity log
-    await produceActivity({
+    void produceActivity({
       userId: ownerId,
       activityType: "create",
       object: "Member",
       objectId: createdMember._id.toString(),
-    });
-    console.log(
-      `Activity log produced for member creation: ${createdMember._id.toString()}`,
+    }).catch((err) =>
+      console.error(
+        `Activity log failed for member creation: ${createdMember._id.toString()}`,
+        err,
+      ),
     );
 
     // 10. Send op status to the client

@@ -71,13 +71,17 @@ const UpdateCommentService = async (
     }
 
     // Produce activity log for updating comment
-    await produceActivity({
+    void produceActivity({
       userId,
       activityType: "edit",
       object: "Comment",
       objectId: comment,
-    });
-    console.log(`Activity log produced for comment update: ${comment}`);
+    }).catch((err) =>
+      console.error(
+        `Activity log failed for comment update: ${comment}`,
+        err,
+      ),
+    );
 
     // 4. Send the updated comment for the task to the user
     return {

@@ -20,7 +20,7 @@ const PORT = Number(process.env.PORT) || 8000;
 
 // Connect DB only outside tests
 if (process.env.NODE_ENV !== "test") {
-  dbConnect().catch(console.dir);
+  await dbConnect().catch(console.dir);
 
   server.listen(PORT, () => {
     console.log("Server running on Port", PORT);

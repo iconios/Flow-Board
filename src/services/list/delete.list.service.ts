@@ -132,13 +132,17 @@ const DeleteListService = async (
 
     if (result) {
       // 9. Produce activity log
-      await produceActivity({
+      void produceActivity({
         userId,
         activityType: "delete",
         object: "List",
         objectId: listId,
-      });
-      console.log(`Activity log produced for list deletion: ${listId}`);
+      }).catch((err) =>
+        console.error(
+          `Activity log failed for list deletion: ${listId}`,
+          err,
+        ),
+      );
       return result;
     } else {
       throw new Error("List deleted successfully but returned nothing");

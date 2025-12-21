@@ -33,13 +33,17 @@ const DeleteCommentService = async (userId: string, commentId: string) => {
     }
 
     // Produce activity log for deleting comment
-    await produceActivity({
+    void produceActivity({
       userId,
       activityType: "delete",
       object: "Comment",
       objectId: trimmedCommentId,
-    });
-    console.log(`Activity log produced for comment deletion: ${trimmedCommentId}`);
+    }).catch((err) =>
+      console.error(
+        `Activity log failed for comment deletion: ${trimmedCommentId}`,
+        err,
+      ),
+    );
 
     // 3. Send the status of the deleted comment to user
     return {

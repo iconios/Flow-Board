@@ -7,9 +7,12 @@
     "test": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --testTimeout=5000",
     "test:watch": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --watch --testTimeout=5000",
     "dev": "nodemon",
+    "worker:activity": "tsx src/redis/activity.worker.ts",
+    "dev:all": "concurrently \"npm run dev\" \"npm run worker:activity\"",
     "build": "tsc && npm run copy-files",
     "copy-files": "copyfiles -u 1 src/controllers/*.html dist/controllers/",
     "start": "tsc & node dist/index.js",
+    "start:worker": "node dist/redis/activity.worker.js",
     "pretty": "npx prettier . --write"
   },
   "keywords": [],

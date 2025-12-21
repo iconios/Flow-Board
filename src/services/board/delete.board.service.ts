@@ -126,13 +126,17 @@ const DeleteBoardService = async (
     }
 
     // Create activity log for board deletion
-    await produceActivity({
+    void produceActivity({
       userId: userObjId.toString(),
       activityType: ActivityType.enum.delete,
       object: ActivityObjectType.enum.Board,
       objectId: boardObjId.toString(),
-    });
-    console.log(`Activity log produced for task creation: ${boardObjId.toString()}`);
+    }).catch((err) =>
+      console.error(
+        `Activity log failed for board deletion: ${boardObjId.toString()}`,
+        err,
+      ),
+    );
 
     return {
       success: true,

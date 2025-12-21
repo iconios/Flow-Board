@@ -56,7 +56,7 @@ export function createApp() {
   app.use("/task", TaskRouter);
   app.use("/activity", ActivityRouter);
   app.use("/comment", CommentRouter);
-  app.use("/v1/checklist", ChecklistRouter);
+  app.use("/api/v1/checklist", ChecklistRouter);
 
   app.all(/(.*)/, (req: Request, res: Response) => {
     return res.status(404).json({ error: "Route not found" });

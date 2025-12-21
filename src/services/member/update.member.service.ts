@@ -101,13 +101,14 @@ const UpdateMemberRoleService = async (
     }
 
     // 4. Produce activity log
-    await produceActivity({
+    void produceActivity({
       userId: ownerId,
       activityType: "edit",
       object: "Member",
       objectId: memberId,
-    });
-    console.log(`Activity log produced for member role update: ${memberId}`);
+    }).catch((err) =>
+      console.error(`Activity log failed for member role update: ${memberId}`, err),
+    );
 
     // 5. Send op status to client
     return {

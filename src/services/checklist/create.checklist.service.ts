@@ -149,13 +149,17 @@ const CreateChecklistService = async (
     }
 
     // Create activity log for checklist creation
-    await produceActivity({
+    void produceActivity({
       activityType: "create",
       object: "Checklist",
       objectId: createdChecklist._id.toString(),
       userId,
-    });
-    console.log(`Activity log produced for checklist creation: ${createdChecklist._id.toString()}`);
+    }).catch((err) =>
+      console.error(
+        `Activity log failed for checklist creation: ${createdChecklist._id.toString()}`,
+        err,
+      ),
+    );
 
     return {
       success: true,

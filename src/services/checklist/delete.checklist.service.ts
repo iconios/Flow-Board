@@ -11,15 +11,17 @@ import { MongooseError, Types } from "mongoose";
 import {
   DeleteChecklistInputSchema,
   type DeleteChecklistInputType,
+  type DeleteChecklistResponseType,
 } from "../../types/checklist.type.js";
 import Checklist from "../../models/checklist.model.js";
 import Board from "../../models/board.model.js";
 import BoardMember from "../../models/boardMember.model.js";
 import { produceActivity } from "../../redis/activity.producer.js";
+import { de } from "zod/locales";
 
 const DeleteChecklistService = async (
   deleteChecklistInput: DeleteChecklistInputType,
-) => {
+): Promise<DeleteChecklistResponseType> => {
   try {
     const { userId, checklistId } =
       DeleteChecklistInputSchema.parse(deleteChecklistInput);
@@ -28,7 +30,7 @@ const DeleteChecklistService = async (
       return {
         success: false,
         message: "Invalid user id format",
-        data: [],
+        data: {},
         error: {
           code: "INVALID_PARAMETER",
           details: "Invalid user id format",
@@ -45,7 +47,7 @@ const DeleteChecklistService = async (
       return {
         success: false,
         message: "Invalid checklist id format",
-        data: [],
+        data: {},
         error: {
           code: "INVALID_PARAMETER",
           details: "Invalid checklist id format",
@@ -67,7 +69,7 @@ const DeleteChecklistService = async (
       return {
         success: false,
         message: "Checklist not found",
-        data: [],
+        data: {},
         error: {
           code: "NOT_FOUND",
           details: "Checklist not found",
@@ -97,7 +99,7 @@ const DeleteChecklistService = async (
       return {
         success: false,
         message: "Access denied",
-        data: [],
+        data: {},
         error: {
           code: "ACCESS_DENIED",
           details: "User not authorized",
@@ -106,7 +108,7 @@ const DeleteChecklistService = async (
           timestamp: new Date().toISOString(),
           checklistId,
           userId,
-          boardId,
+          boardId: boardId.toString(),
         },
       };
     }
@@ -119,13 +121,17 @@ const DeleteChecklistService = async (
 
     // Create activity log for checklist deletion
     if (isDeleted) {
-      await produceActivity({
+      void produceActivity({
         userId,
         activityType: "delete",
         object: "Checklist",
         objectId: checklistId,
-      });
-      console.log(`Activity log produced for checklist deletion: ${checklistId}`);
+      }).catch((err) =>
+        console.error(
+          `Activity log failed for checklist deletion: ${checklistId}`,
+          err,
+        ),
+      );
     }
 
     return {
@@ -133,7 +139,7 @@ const DeleteChecklistService = async (
       message: isDeleted
         ? "Checklist deleted successfully"
         : "Checklist could not be deleted or was already removed",
-      data: [],
+      data: {},
       error: isDeleted
         ? null
         : {
@@ -145,7 +151,7 @@ const DeleteChecklistService = async (
         deletedCount: deletedChecklist.deletedCount,
         checklistId,
         userId,
-        boardId,
+        boardId: boardId.toString(),
       },
     };
   } catch (error) {
@@ -157,7 +163,7 @@ const DeleteChecklistService = async (
         return {
           success: false,
           message: "Invalid ID format",
-          data: [],
+          data: {},
           error: {
             code: "CAST_ERROR",
             details: "The provided ID format is invalid",
@@ -172,7 +178,7 @@ const DeleteChecklistService = async (
         return {
           success: false,
           message: "Validation error",
-          data: [],
+          data: {},
           error: {
             code: "VALIDATION_ERROR",
             details: "Error validating query parameters",
@@ -187,7 +193,7 @@ const DeleteChecklistService = async (
       return {
         success: false,
         message: "Database error occurred",
-        data: [],
+        data: {},
         error: {
           code: "DATABASE_ERROR",
           details:
@@ -205,7 +211,7 @@ const DeleteChecklistService = async (
     return {
       success: false,
       message: "Internal server error",
-      data: [],
+      data: {},
       error: {
         code: "INTERNAL_ERROR",
         details:

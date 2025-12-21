@@ -112,13 +112,14 @@ const DeleteTaskService = async (
     }
 
     // 6. Produce activity log
-    await produceActivity({
+    void produceActivity({
       userId,
       activityType: "delete",
       object: "Task",
       objectId: taskId,
-    });
-    console.log(`Activity log produced for task deletion: ${taskId}`);
+    }).catch((err) =>
+      console.error(`Activity log failed for task deletion: ${taskId}`, err),
+    );
 
     // 7. Send the deleted task data to user
     return result;

@@ -106,13 +106,12 @@ ChecklistRouter.put(
       // 1. Get the userId, checklistId from params, and content from request body
       const userId = req.userId as string;
       const checklistId = req.params.checklistId as string;
-      const { content } = req.body;
+      const updateBody = req.body;
 
       // 2. Pass to EditChecklistService
-      const result = await EditChecklistService({
-        userId,
+      const result = await EditChecklistService(userId, {
         checklistId,
-        content,
+        ...updateBody,
       });
 
       // 3. Return response based on service response

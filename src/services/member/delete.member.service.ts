@@ -88,13 +88,17 @@ const DeleteMemberService = async (ownerId: string, memberId: string) => {
     });
 
     // 6. Produce activity log
-    await produceActivity({
+    void produceActivity({
       userId: ownerId,
       activityType: "delete",
       object: "Member",
       objectId: memberId,
-    });
-    console.log(`Activity log produced for member removal: ${memberId}`);
+    }).catch((err) =>
+      console.error(
+        `Activity log failed for member removal: ${memberId}`,
+        err,
+      ),
+    );
 
     // 7. Send op status to client
     return {

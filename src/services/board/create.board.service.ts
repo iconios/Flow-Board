@@ -48,13 +48,17 @@ const CreateBoardService = async (
     const board = await newBoard.save();
 
     // 5. Create activity log for board creation
-    await produceActivity({
+    void produceActivity({
       userId: id,
       activityType: ActivityType.enum.create,
       object: ActivityObjectType.enum.Board,
       objectId: board._id.toString(),
-    });
-    console.log(`Activity log produced for task creation: ${board._id.toString()}`);
+    }).catch((err) =>
+      console.error(
+        `Activity log failed for task creation: ${board._id.toString()}`,
+        err,
+      ),
+    );
 
     // 6. Return the status message to the caller
     return {

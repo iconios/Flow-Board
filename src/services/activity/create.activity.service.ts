@@ -46,8 +46,8 @@ const CreateActivityService = async (
       userId,
       activityType: savedActivity.activityType,
       object: savedActivity.object,
-      objectId: savedActivity.objectId,
-      activityId: savedActivity._id,
+      objectId: savedActivity.objectId.toString(),
+      activityId: savedActivity._id.toString(),
       timestamp: new Date().toISOString(),
     });
 

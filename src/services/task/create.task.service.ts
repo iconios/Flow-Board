@@ -126,13 +126,14 @@ const CreateTaskService = async (
 
     // 4. Produce activity log
     if (result && taskId) {
-      await produceActivity({
+      void produceActivity({
         userId,
         activityType: "create",
         object: "Task",
         objectId: taskId,
-      });
-      console.log(`Activity log produced for task creation: ${taskId}`);
+      }).catch((err) =>
+        console.error(`Activity log failed for task creation: ${taskId}`, err),
+      );
     }
 
     // 5. Send the details of the new task to the client

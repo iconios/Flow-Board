@@ -118,13 +118,17 @@ const CreateListService = async (
     // Return the result from the transaction
     if (result) {
       // Produce activity log for creating list
-      await produceActivity({
+      void produceActivity({
         userId,
         activityType: "create",
         object: "List",
         objectId: listId.toString(),
-      });
-      console.log(`Activity log produced for list creation: ${listId.toString()}`);
+      }).catch((err) =>
+        console.error(
+          `Activity log failed for list creation: ${listId.toString()}`,
+          err,
+        ),
+      );
       return result;
     } else {
       throw new Error("Transaction completed but no result was set");

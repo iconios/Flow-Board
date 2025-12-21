@@ -222,13 +222,14 @@ const UpdateTaskService = async (
     }
 
     // 5. Produce activity log
-    await produceActivity({
+    void produceActivity({
       userId,
       activityType: ActivityType.enum.edit,
       object: "Task",
       objectId: taskId,
-    });
-    console.log(`Activity log produced for task update: ${taskId}`);
+    }).catch((err) =>
+      console.error(`Activity log failed for task update: ${taskId}`, err),
+    );
 
     // 6. Send the updated task to the user
     return {

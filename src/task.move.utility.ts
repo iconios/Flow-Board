@@ -13,6 +13,7 @@ import {
 } from "./types/task.type.js";
 import UpdateTaskService from "./services/task/update.task.service.js";
 import { ZodError } from "zod";
+import { produceActivity } from "./redis/activity.producer.js";
 
 const TaskMoveUtility = async (socket: Socket, payload: TaskMoveInputType) => {
   // 1. Get and validate the task move parameters - userId, taskId, listId
@@ -42,6 +43,15 @@ const TaskMoveUtility = async (socket: Socket, payload: TaskMoveInputType) => {
       message: `Task ${taskId} moved successfully`,
       data: result.task,
     });
+
+    // Log activity
+    await produceActivity({
+      userId,
+      activityType: "move",
+      object: "Task",
+      objectId: taskId,
+    });
+    console.log(`Activity log produced for task move: ${taskId}`);
   } catch (error) {
     console.error("Error moving task", error);
 
