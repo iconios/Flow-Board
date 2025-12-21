@@ -97,7 +97,7 @@ ChecklistRouter.post(
 3. Return response based on service response
 */
 
-ChecklistRouter.put(
+ChecklistRouter.patch(
   "/:checklistId",
   TokenExtraction,
   async (req: Request, res: Response) => {

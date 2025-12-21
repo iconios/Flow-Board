@@ -14,6 +14,7 @@ import TaskRouter from "./controllers/task.controller.js";
 import ActivityRouter from "./controllers/activity.controller.js";
 import CommentRouter from "./controllers/comment.controller.js";
 import ChecklistRouter from "./controllers/checklist.controller.js";
+import path from "node:path";
 
 export function createApp() {
   const app = express();
@@ -56,10 +57,10 @@ export function createApp() {
   app.use("/task", TaskRouter);
   app.use("/activity", ActivityRouter);
   app.use("/comment", CommentRouter);
-  app.use("/api/v1/checklist", ChecklistRouter);
+  app.use("/checklist", ChecklistRouter);
 
   app.all(/(.*)/, (req: Request, res: Response) => {
-    return res.status(404).json({ error: "Route not found" });
+    return res.status(404).json({ error: "Route not found", path: req.path, method: req.method });
   });
 
   return app;
